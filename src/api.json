@@ -1,0 +1,551 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "0.1.0",
+        "title": "eNahar Admin API",
+        "description": "This is the place to add your own path endpoints"
+    },
+    "servers": [
+        {
+            "description": "Endpoint for testing on localhost",
+            "url": "http://localhost:8080/exist/apps/eNaharPro"
+        }
+    ],
+    "tags": [
+    	{
+    		"name":"auth",
+    		"description":"route handles login, logout"
+    	},
+        {
+            "name":"pages",
+            "description":"pages API"
+        },
+        {
+            "name": "read",
+            "description": "get instance"
+        },
+        {
+            "name": "query",
+            "description": "search type"
+        },
+        {
+            "name": "update",
+            "description": "put instance"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "basicAuth": {
+                "type": "http",
+                "scheme": "basic"
+            },
+            "cookieAuth": {
+                "type": "apiKey",
+                "name": "eNahar.login",
+                "in": "cookie"
+            }
+        }
+    },
+    "paths": {
+        "/login": {
+            "post": {
+                "summary": "User Login",
+                "description": "Start an authenticated session for the given user",
+                "tags": ["auth"],
+                "operationId": "nauth:login",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/xml": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "required": [ "user" ],
+                                "properties": {
+                                    "user": {
+                                        "description": "Name of the user",
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "required": [ "user" ],
+                                "properties": {
+                                    "user": {
+                                        "description": "Name of the user",
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user": { "type": "string" },
+                                        "groups": {
+                                            "type": "array",
+                                            "items": { "type": "string" }
+                                        },
+                                        "dba": { "type": "boolean" },
+                                        "domain": { "type": "string" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Wrong user or password"
+                    }
+                },
+                "security": [{ "cookieAuth": [] }]
+            }
+        },
+        "/logout": {
+            "get": {
+                "summary": "User Logout",
+                "description": "End session of the current user",
+                "operationId": "nauth:logout",
+                "tags": ["auth"],
+                "parameters": [
+                    {
+                        "name": "logout",
+                        "in": "query",
+                        "description": "Set to some value to log out the current user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": { "type": "boolean" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "301": {
+                        "description": "Redirect with the logout parameter set.",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": { "description": "unauthorized" }
+                }
+            }
+        },
+        "/ICal/{id}": {
+    		"get": {
+    			"tags": ["read","ICal"],
+    			"operationId": "nical:read-ical",
+    			"summary": "read-instance: read ICal instance",
+				"parameters": [
+					{
+	    				"name": "id",
+    	    			"in": "path",
+        				"description": "The resource ID",
+        				"required": true,
+        				"style": "simple",
+        				"schema": {
+							"minimum": 1,
+							"type": "string",
+    	    				"example": "null"
+        					},
+        				"example": "123"
+					},
+                    {
+                        "name": "realm",
+                        "in": "query",
+                        "description": "realm of user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "loguid",
+                        "in": "query",
+                        "description": "uid of user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "lognam",
+                        "in": "query",
+                        "description": "name of user",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                	}
+				],
+    			"responses": {
+        			"200": {
+    			    	"description": "Success",
+    		 			"content": {
+            				"application/xml": {
+            					"schema": {
+            						"$ref": "#/components/schemas/FHIR-XML-RESOURCE"
+            					},
+            					"example": null
+            				}
+    					},
+                    "401": {
+                        "description": "ical resource not found"
+                    }
+        			}
+    			}
+    		}
+        },
+        "/ICal": {
+            "get": {
+                "summary": "iCal",
+                "description": "search iCal instance",
+                "tags": ["query"],
+                "operationId": "nical:search-ical",
+                "parameters": [
+                    {
+                        "name": "realm",
+                        "in": "query",
+                        "description": "realm of user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "loguid",
+                        "in": "query",
+                        "description": "uid of user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "lognam",
+                        "in": "query",
+                        "description": "name of user",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "_elements",
+                        "in": "query",
+                        "description": "Request that only a specific set of elements be returned for resources",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "owner",
+                        "in": "query",
+                        "description": "owner of ical",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "group",
+                        "in": "query",
+                        "description": "owner group of ical",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "active",
+                        "in": "query",
+                        "description": "status of ical",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/xml": {
+            					"schema": {
+            						"$ref": "#/components/schemas/FHIR-XML-RESOURCE"
+            					},
+            					"example": null
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "ical instances not found"
+                    }
+                },
+                "security": [{ "cookieAuth": [] }]
+            },
+           "put": {
+                "summary": "iCal",
+                "description": "update iCal resource",
+                "tags": ["query"],
+                "operationId": "nical:update-ical",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/xml": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user": { "type": "string" },
+                                        "groups": {
+                                            "type": "array",
+                                            "items": { "type": "string" }
+                                        },
+                                        "dba": { "type": "boolean" },
+                                        "domain": { "type": "string" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "storing ical instance failed"
+                    }
+                },
+                "security": [{ "cookieAuth": [] }]
+            }
+        },
+        "/Schedule/{id}": {
+    		"get": {
+    			"tags": ["read","Schedule"],
+    			"operationId": "nschedule:read-schedule",
+    			"summary": "read-instance: read Schedule instance",
+				"parameters": [
+					{
+	    				"name": "id",
+    	    			"in": "path",
+        				"description": "The resource ID",
+        				"required": true,
+        				"style": "simple",
+        				"schema": {
+							"minimum": 1,
+							"type": "string",
+    	    				"example": "null"
+        					},
+        				"example": "123"
+					},
+                    {
+                        "name": "realm",
+                        "in": "query",
+                        "description": "realm of user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "loguid",
+                        "in": "query",
+                        "description": "uid of user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "lognam",
+                        "in": "query",
+                        "description": "name of user",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                	}
+				],
+    			"responses": {
+        			"200": {
+    			    	"description": "Success",
+    		 			"content": {
+            				"application/xml": {
+            					"schema": {
+            						"$ref": "#/components/schemas/FHIR-XML-RESOURCE"
+            					},
+            					"example": null
+            				}
+    					},
+                    "401": {
+                        "description": "schedule resource not found"
+                    }
+        			}
+    			}
+    		}
+
+        },
+        "/Schedule": {
+            "get": {
+                "summary": "Schedule",
+                "description": "search Schedule instance",
+                "tags": ["query"],
+                "operationId": "nschedule:search-schedule",
+                "parameters": [
+                    {
+                        "name": "realm",
+                        "in": "query",
+                        "description": "realm of user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "loguid",
+                        "in": "query",
+                        "description": "uid of user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "lognam",
+                        "in": "query",
+                        "description": "name of user",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "_elements",
+                        "in": "query",
+                        "description": "Request that only a specific set of elements be returned for resources",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "owner",
+                        "in": "query",
+                        "description": "owner of schedule",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "group",
+                        "in": "query",
+                        "description": "owner group of schedule",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "active",
+                        "in": "query",
+                        "description": "status of schedule",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/xml": {
+            					"schema": {
+            						"$ref": "#/components/schemas/FHIR-XML-RESOURCE"
+            					},
+            					"example": null
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "schedule instances not found"
+                    }
+                },
+                "security": [{ "cookieAuth": [] }]
+            },
+           "put": {
+                "summary": "Schedule",
+                "description": "update Schedule resource",
+                "tags": ["update"],
+                "operationId": "nschedule:update-schedule",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/xml": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user": { "type": "string" },
+                                        "groups": {
+                                            "type": "array",
+                                            "items": { "type": "string" }
+                                        },
+                                        "dba": { "type": "boolean" },
+                                        "domain": { "type": "string" }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "storing schedule instance failed"
+                    }
+                },
+                "security": [{ "cookieAuth": [] }]
+            }
+        }
+    },
+    "security": [
+        {
+            "cookieAuth": []
+        },
+        {
+            "basicAuth": []
+        }
+    ]
+}

@@ -1,0 +1,184 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes" name="viewport"/>
+
+    <title>Event</title>
+    <link href="../resources/css/fore.css" rel="stylesheet"/>
+
+    <style>
+      body, .wrapper {
+          margin: 0;
+          padding: 0;
+      }
+
+      .wrapper {
+          width: 21cm;
+          height: 29.7cm;
+          background: lightyellow;
+          position: relative;
+      }
+        .grid {
+        	display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+	        width: 100%;
+        }
+        .rowgrid {
+        	display: grid;
+            grid-template-rows: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+	        width: 100%;
+        }
+        #r-rdate{
+            display: grid !important;
+            grid-template-columns: repeat(3,1fr);
+            grid-column-gap: 3rem;
+            grid-row-gap: 1rem;
+            width: 100%;
+        }
+        #r-rdate &gt; fx-repeatitem {
+            /*background: rgba(255,255,255,0.5);*/
+            border:thin solid blue;
+            position: relative;
+            min-width: 10rem;
+            padding:0.5rem 0.25rem;
+        }
+        #r-rdate .header &gt; fx-control{
+            width: calc(100% - 5rem);
+        }
+
+        .iconbtn{
+            grid-area: icon;
+        }
+        .iconbtn{
+            position: relative;
+            right: 0rem;
+        }
+        .iconbtn button:hover{
+            background: grey;
+            color:white;
+        }
+        .delRDate{
+            right: -1.2rem;
+        }
+        .iconbtn button{
+            border-radius: 50%;
+            border:none;
+            color:black;
+            background: white;
+        }
+        .addRDate{
+            right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+	<div class="wrapper">
+
+      <fx-fore id="eventpage">
+<!--
+        <fx-message event="ready">Event ready</fx-message>
+        <fx-load event="ready" attach-to="#load-section" url="event-help.html"/>
+-->        
+        <fx-model id="mevent">
+          <fx-message event="model-construct-done">event model ready</fx-message>
+
+          <fx-instance>
+            <data>
+                <event>
+                    <name value="amb-???"/>
+                    <summary value=""/>
+                    <description value=""/>
+                    <period>
+                    </period>
+                    <note value=""/>
+                    <!--
+                    <rrule>
+                        <freq value="daily"/>
+                        <byweekno value="every"/>
+                        <byday value=""/>
+                    </rrule>
+                    <rdate>
+                        <date value="2024-08-01"/>
+                    </rdate>
+                    <exdate>
+                        <date value="2024-08-01"/>
+                    </exdate>
+                    -->
+                </event>
+            </data>
+          </fx-instance>
+          <fx-instance id="helper">
+            <data>
+                <period>
+                    <start value=""/>
+                    <end value=""/>
+                </period>
+            </data>
+          </fx-instance>
+          
+        </fx-model>
+		<fx-group ref="./event">
+            <fx-return ref="." event="value-changed"/>
+            <h4>Event Details</h4>
+            
+			<fx-control ref="./name/@value" update-event="input">
+              <label>Name</label>
+
+			</fx-control>
+		    <fx-group ref="./period">
+    		    <fx-control ref="./start/@value" update-event="input">
+			        <input id="e-start" type="time"/>
+                        <label for="e-start">Von:</label>
+				        <fx-trigger ref=".[not(./start)]">
+                            <button>Von?</button>
+                            <fx-insert ref="./start" context="." origin="instance('helper')/period/start"/>
+                        </fx-trigger>
+				        <fx-trigger ref="./start">
+                            <button>x</button>
+                            <fx-delete ref="."/>
+                        </fx-trigger>
+    			</fx-control>
+	    		<div>
+		            <fx-control ref="./end/@value" update-event="input">
+    		    	    <input id="e-end" type="time"/>
+                        <label for="e-end">Bis:</label>
+        			</fx-control>
+				    <fx-trigger ref=".[not(./end)]">
+                        <button>Bis?</button>
+                        <fx-insert ref="./end" context="." origin="instance('helper')/period/end"/>
+                    </fx-trigger>
+			    	<fx-trigger ref="./end">
+                        <button>x</button>
+                        <fx-delete ref="."/>
+                    </fx-trigger>
+	    		</div>
+		    </fx-group>
+    		<details>
+	    	    <summary>Note</summary>
+		        <fx-control ref="./note">
+                    <textarea id="evt-note" cols="40" rows="4" class="widget"/>
+                </fx-control>
+	    	</details>
+	    	<section id="load-section">
+                <div>
+                    <p>
+                    <fx-control id="evt-rrule" ref="." src="rrule.html" initial="."/>
+                    </p>
+<!--
+                    <p>
+                    <fx-control id="evt-rdate" ref="." src="rdate.html" initial="."/>
+                    </p>
+                    <p>
+                    <fx-control id="evt-exdate" ref="." src="exdate.html" initial="."/>
+                    </p>
+-->
+                </div>
+            </section>
+        </fx-group>
+    </fx-fore>
+	</div>
+	<script type="module" src="../resources/script/fore-dev.js"/>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes" name="viewport"/>
+
+    <title>Sub Test</title>
+    <link href="../resources/css/fore.css" rel="stylesheet"/>
+
+
+</head>
+<body>
+    <fx-fore>
+        <fx-model>
+            <fx-message event="model-construct-done">event model ready</fx-message>
+            <fx-instance>
+                <data>
+                    <sub value="result"/>
+                </data>
+            </fx-instance>
+        </fx-model>
+        
+        <fx-control ref="sub/@value">
+                <label>Your item</label>
+                <fx-return event="value-changed" ref="."/>
+            </fx-control>
+
+      </fx-fore>
+
+	<script type="module" src="../resources/script/fore-dev.js"/>
+  </body>
+</html>

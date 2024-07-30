@@ -1,0 +1,6 @@
+build
+node_modules
+.idea
+.env
+**/.DS_Store
+dist

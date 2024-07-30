@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes" name="viewport"/>
+    <title>todo</title>
+    <link rel="stylesheet" href="../resources/css/fore.css"/>
+    <link rel="stylesheet" href="../resources/css/todo.css"/>
+
+<!--    <script type="module" src="http://localhost:8090/index.js"></script>-->
+    <script type="module" src="../resources/script/fore-dev.js"/>
+<style>
+        fx-dialog.show .dialog-content {
+            padding: 1rem;
+            padding-top: 5rem;
+            width: 22rem;
+            height: 8rem;
+            border: thin solid;
+            border-radius: 0.3rem;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            background: white;
+        }
+        fx-dialog header{
+            color: white;
+            font-size: 1.4rem;
+            position: absolute;
+            width: calc(100% - 2rem);
+            background: var(--paper-light-blue-700);
+            left: 0;
+            top: 0;
+            padding: 1rem;
+        }
+        fx-control{
+            display: block;
+        }
+        input{
+            border:thin solid #ddd;
+            width: 70%;
+        }
+        label{
+            width:30%;
+            display: inline-block;
+        }
+
+        #login fx-trigger button{
+            background: var(--paper-blue-500);
+            color:white;
+            padding:0.5em;
+        }
+        .show-completed-true [nonrelevant]{
+            display:block;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <!-- for accessability adding a 'role' and 'title' to make it a landmark -->
+    <fx-fore id="todo" title="todo app" role="form">
+        <!-- When Fore is ready, it receives the 'ready' event and we can savely interact with the UI, setting
+        the focus to the control with id 'task'. -->
+        <fx-setfocus control="task" event="ready"/>
+
+        <!-- listening on document for an 'logged-in' event, storing the username and loading the todos of the user.  -->
+        <fx-action event="logged-in" target="#document">
+            <fx-setvalue ref="instance()/@user" value="event('user')"/>
+            <fx-update/>
+            <fx-send submission="load"/>
+        </fx-action>
+
+        <!-- listening on document for an 'logged-out' event, output a message and reset username -->
+        <fx-action event="logged-out" target="#document">
+            <fx-message>logged out {event('user')}</fx-message>
+            <fx-setvalue ref="instance()/@user"/>
+        </fx-action>
+
+        <fx-model>
+
+            <!-- data are stored in fx-instance elements - the todos will go here -->
+            <fx-instance id="default">
+                <data/>
+            </fx-instance>
+
+            <!-- <fx-bind ref="instance()/task" relevant="./@complete='false' or boolean-from-string(instance('helper')/show-completed)"> -->
+            <!-- a binding applies a constraint to a task. A task will only be relevant (and displayed) when its 'complete' attribute is 'false' so
+            we hide tasks that are already complete. -->
+            <fx-bind ref="instance()/task" relevant="./@complete='false'">
+                <fx-bind ref="./text()" required="true()"/>
+            </fx-bind>
+
+            <!-- the helper instance contains some nodes being used at runtime and is the structure is loaded from
+            an external xml file. -->
+            <fx-instance id="helper" src="helper.xml"/>
+
+            <!-- one of the nodes from 'helper' is 'add-task'. We use its 'readonly' constraint to toggle the 'add' button
+            on and off -->
+            <fx-bind ref="instance('helper')/add-task" readonly="string-length(../task) = 0"/>
+
+            <!-- submissions send http requests. This one loads all todos for a user with a GET request and
+            replace our default instance with the response data. -->
+            <fx-submission id="load" url="../todo" method="get" replace="instance"/>
+
+            <!-- this submission saves the current list of todos of the default instance with a POST request to the todo API. -->
+            <fx-submission id="save" url="../todo" method="post" replace="none" nonrelevant="keep">
+                <!-- in case of a successful request we show a toast message to the user which outputs the location. A template expression - enclosed
+                 by curly brackets is used to create the filename with the username as part of it. -->
+                <fx-message event="submit-done">stored to '../todo?filename={instance()/*/@user}-todos.xml'</fx-message>
+            </fx-submission>
+
+        </fx-model>
+
+        <!-- a nested Fore element is used and loaded from login.html. The containing fx-fore element from that page
+        is extracted and replaces the original element in the DOM. The login page contains the complete logic and
+        UI for a form-based login into eXist-db. -->
+        <fx-fore id="login" src="login.html"/>
+
+        <!-- template expressions can occur on nearly any attribute but are most valuable to switch CSS classes.
+        They are evaluated as XPath 3.1 expressions - here a conditional is used to set the CSS class to either 'loggedIn'
+        or 'hidden'.
+        When a user is not logged in the class will be 'hidden' and the whole section is invisible to the user -->
+        <section class="{if(string-length(instance()/@user) != 0) then 'loggedIn' else 'hidden'}">
+            <h1>Todo</h1>
+            <div class="info">
+                <!-- template expressions can used builtin and custom functions and access pathes in your
+                instance data with the help of the 'instance()' function. Without args it returns the first
+                in document order which is always the default.-->
+                You have {count(instance()/task[@complete='true'])} completed tasks {uri-path()}
+            </div>
+
+            <div class="info open">
+                {if(count(instance()/task[@complete='false'])!=0) then "You have " ||
+                count(instance()/task[@complete='false']) || " open tasks" else ""}
+            </div>
+
+            <div class="info big">
+                {if(count(instance()/task[@complete='false'])=0) then "You're all done!" else ""}
+            </div>
+
+
+            <div class="new">
+                <!-- control to insert a new task into the list. It uses a native 'input' element and binds it
+                 to the 'task' node in the instance data. The updating of the data happens on an 'input' event
+                 firing on the input. The default is 'blur'. -->
+                <fx-control id="task" ref="instance('helper')/task" update-event="input">
+                    <input type="text" class="widget"/>
+                </fx-control>
+
+                <!-- a trigger executes some actions and wraps a clickable area (button, link, image) and the actions -->
+                <fx-trigger class="btn" ref="instance('helper')/add-task">
+                    <button>+</button>
+                    <fx-action>
+                        <!-- inserts a new task into the default instance using a template from the helper instance (origin).
+                         It will be inserted at first position. -->
+                        <fx-insert context="instance()" ref="task" origin="instance('helper')/task" at="1" position="before"/>
+                        <!-- the 'send' action triggers a submission. - the data will be send to the endpoint. -->
+                        <fx-send submission="save"/>
+                        <!-- we reset the value of helper task to be empty again waiting for new input. -->
+                        <fx-setvalue ref="instance('helper')/task"/>
+                        <!-- we set the focus to that control again -->
+                        <fx-setfocus control="task"/>
+                    </fx-action>
+                </fx-trigger>
+            </div>
+
+            <!-- repeats over all 'task' nodes in the default instance and stamps out the template once
+            for each task. Also uses a calculated 'class' to switch between hiding/displaying completed items. -->
+            <fx-repeat id="r-task" ref="task" class="show-completed-{instance('helper')/show-completed}">
+                <template>
+                    <div class="complete-{@complete}">
+                        <!-- uaing a native checkbox using the 'checked' property of it as the value and binding
+                         to the 'complete' attribute of a task. -->
+                        <fx-control ref="@complete" value-prop="checked" update-event="input">
+                            <input class="widget" type="checkbox"/>
+                            <!-- whenever the user changes the data via interaction the 'value-changed' event will
+                            occur which we use to trigger our saving submission.-->
+                            <fx-send submission="save" event="value-changed"/>
+                        </fx-control>
+                        <!-- outputs the text for the task. The dot reference '.' resolves upwards to the next 'ref'
+                        attribute, finds it on fx-repeat and returns the 'task' node. -->
+                        <fx-output class="complete {@complete}" ref=".">
+                        </fx-output>
+                        <!-- trigger to delete a task -->
+                        <fx-trigger class="btn delete">
+                            <button>x</button>
+                            <fx-action>
+                                <!-- refers to the current task with the dot reference again and deletes the current
+                                 node from the data. The UI will get refreshed automatically. -->
+                                <fx-delete ref="."/>
+                                <!-- after deletion we want to store the new state -->
+                                <fx-send submission="save"/>
+                            </fx-action>
+                        </fx-trigger>
+                    </div>
+                </template>
+
+            </fx-repeat>
+
+            <!-- optional control to show/hide completed tasks. It binds to a helper node 'show-completed' which is
+            used in a template expression on the repeat to calculate the CSS class to either 'show-completed-true' or
+            'show-completed-false'. If true we can 'unhide' the nonrelevant (completed) nodes and show them. -->
+            <fx-control id="switch" ref="instance('helper')/show-completed" value-prop="checked" update-event="input">
+                <label for="showcompleted">show completed</label>
+                <input id="showcompleted" type="checkbox" class="widget"/>
+                <fx-action event="value-changed">
+                    <fx-send submission="load"/>
+                </fx-action>
+            </fx-control>
+        </section>
+    </fx-fore>
+</div>
+</body>
+</html>
