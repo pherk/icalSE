@@ -28,6 +28,7 @@
         input{
             border:thin solid #ddd;
             width: 70%;
+            font-size: 1.2rem;
         }
         label{
             width:30%;
