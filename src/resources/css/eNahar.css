@@ -23,23 +23,19 @@
             padding: 1rem;
         }
         fx-control{
-            display: block;
+            display: inline;
         }
         input{
             border:thin solid #ddd;
-            width: 70%;
-            font-size: 1.2rem;
-        }
-        label{
-            width:30%;
-            display: inline-block;
+            width: 80%;
+            font-size: 1.0rem;
         }
 
-    fx-trigger button{
+        fx-trigger button{
             background: var(--paper-blue-500);
             color:white;
             padding:0.5em;
-    }
+        }
 /*
         .header, fx-repeat-item {
             display: grid;
@@ -133,9 +129,6 @@
             outline:var(--paper-blue-500) solid 2px;
             filter: brightness(120%);
             /*margin: 8px 0;*/
-        }
-        fx-control{
-            display: inline;
         }
     
 ul{

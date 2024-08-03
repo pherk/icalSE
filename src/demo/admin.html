@@ -2,7 +2,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes" name="viewport"/>
-    <title>eNahar</title>
+    <title>iCal</title>
     <link rel="stylesheet" href="../resources/css/fore.css"/>
     <link rel="stylesheet" href="../resources/css/eNahar.css"/>
 
@@ -41,8 +41,9 @@
             max-width: 100%;
         }
         fx-control{
-            width: 100%;
+            grid-column : auto/ span 2;
             position:relative;
+            font-size: 1rem;
         }
         fx-repeat{
             position:relative;
@@ -76,7 +77,7 @@
             margin-top:1rem;
         }
         .event{
-            width: 80%;
+            width: 100%;
             display: block;
         }
         #event fx-repeatitem{
@@ -107,12 +108,28 @@
             color:black;
             background: white;
         }
+fx-group.settings {
+    display:grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: 1fr auto;
+    grid-gap:5px;
+}
+fx-group.settings  label       { text-align:right; }
+fx-group.settings  label:after { content: ":"; }
+div.settings {
+    display:grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: 1fr auto;
+    grid-gap:5px;
+}
+div.settings  label       { text-align:right; }
+div.settings  label:after { content: ":"; }
     </style>
 </head>
 <body>
 <div class="wrapper">
     <!-- for accessability adding a 'role' and 'title' to make it a landmark -->
-    <fx-fore id="eNahar" title="eNahar app" role="form">
+    <fx-fore id="ical" title="ical app" role="form">
         <!-- When Fore is ready, it receives the 'ready' event and we can savely interact with the UI, setting
         the focus to the control with id 'task'. -->
         <fx-setfocus control="provider" event="ready"/>
@@ -130,7 +147,7 @@
             <fx-message>logged out {event('user')}</fx-message>
             <fx-setvalue ref="instance()/@user"/>
         </fx-action>
-        <fx-message event="ready">admin ready: index of r-sched: {index('r-sched')}</fx-message>
+
         <fx-model>
 
             <fx-instance id="default">
@@ -156,7 +173,26 @@
                 </data>
             </fx-instance>
 
-
+          <!--
+          <fx-bind ref=".//byDay/@value" constraint="local:days-validjs(.,/../../freq/@value)">
+              <fx-alert>
+                <h4>byDay invalid</h4>
+                <p>Erlaubt ist eine Komma separierte Liste von
+                    Werktagen, gfls. mit Prefix für die Woche (Mo,5:Do)</p>
+              </fx-alert>
+          </fx-bind>
+          <fx-bind ref=".//byWeekNo/@value" constraint="local:weeks-validjs(.,./../../freq/@value)">
+              <fx-alert>
+                <h4>byWeekNo invalid</h4>
+                <p>Erlaubt ist alternativ:
+                    <ul>
+                        <li>every, even, odd für die Kalenderwochen</li>
+                        <li>eine Komma separierte numerische Liste von KW (mit 'wöchentlich')</li>
+                    </ul>
+                </p>
+              </fx-alert>
+          </fx-bind>
+          -->
 
             <fx-instance id="selected">
                 <data>
@@ -177,11 +213,10 @@
                 -->
             </fx-bind>
 
-            <!-- the helper instance contains some nodes being used at runtime and is the structure is loaded from
+            <!-- the infos instance contains some nodes being used at runtime and is the structure is loaded from
             an external xml file. -->
-            <fx-instance id="i-calInfos" src="/exist/apps/eNahar/cal/cal-infos.xml"/>
+            <fx-instance id="i-ical-infos" src="ical-infos.xml"/>
 
-            <dx-instance id="helper" src="helper.xml"/>
             
             <!-- submissions send http requests. This one loads all ical owners with a GET request and
             replace our ical-list instance with the response data. -->
@@ -224,14 +259,38 @@
 
                 <fx-bind ref="./show-all-agendas" type="xs:boolean"/>
 
-                <fx-bind ref="./save-trigger" relevant="instance('i-control')/dirty = 'true'"/>
-
+                <fx-bind ref="./save-trigger" relevant="boolean-from-string(instance('i-control')/dirty)"/>
+<!--
                 <fx-bind ref="./has-schedule" relevant="exists(instance('i-cals')/schedule)"/>
                 <fx-bind ref="./has-agenda" relevant="exists(instance('i-cals')/schedule[index('r-sched')]/agenda)"/>
-                <fx-bind ref="./has-event" relevant="exists(instance('i-cals')/schedule[index('r-sched')]/agenda[index('r-agenda')]/event)"/>
-                <fx-bind ref="./has-rdate" relevant="exists(instance('i-cals')/schedule[index('r-sched')]/agenda[index('r-agenda')]/event[index('r-event')]/rdate/date/@value)"/>
+                <fx-bind ref="./has-event"  relevant="exists(instance('i-cals')/schedule[index('r-sched')]/agenda[index('r-agenda')]/event)"/>
+                <fx-bind ref="./has-rdate"  relevant="exists(instance('i-cals')/schedule[index('r-sched')]/agenda[index('r-agenda')]/event[index('r-event')]/rdate/date/@value)"/>
+-->
             </fx-bind>
-
+            
+            <fx-instance id="helper">
+                <data>
+                    <period>
+                        <start value=""/>
+                        <end value=""/>
+                    </period>
+                </data>
+            </fx-instance>
+            
+            <fx-function signature="local:days-validjs($byday as xs:string, $freq as xs:string) as xs:boolean" type="text/javascript">
+              const reday = /^$|^([1-5]:)?(Mo|Di|Mi|Do|Fr)(,([1-5]:)?(Mo|Di|Mi|Do|Fr))*$/;         
+              var s = $byday, f = $freq;
+              return reday.test(s); 
+            </fx-function>
+            <fx-function signature="local:weeks-validjs($byweek as xs:string, $freq as xs:string) as xs:boolean" type="text/javascript">
+              const rewk = /^(every|even|odd|\d{1,2}(,\d{1,2})*)$/;
+              var s = $byweek, f = $freq, r = false;
+              if (f=="weekly") {
+                r = rekw.test(s);
+              }
+              return r;
+            </fx-function>
+            
         </fx-model>
         <nav> 
             <ul> 
@@ -301,7 +360,7 @@
               <div class="wrapit">
                 <fx-control ref="instance('selected')/show-all-agendas" update-event="input" value-prop="checked">
                       <div style="float:left;margin-right:20px;">
-                        <label class="" for="check1">All iCals?</label>
+                        <label class="" for="check1">All active iCals?</label>
                         <input id="check1" class="widget" type="checkbox"/>
                       </div>
                         <fx-send event="value-changed" submission="s-load-names"/>
@@ -317,36 +376,17 @@
               </div>
             </div>
         </section>
+   
         <section class="{if(string-length(instance()/@user) != 0) then 'loggedIn' else 'hidden'}">
-<!--
-        <fx-repeat id="schedule" ref="instance('i-cals')/schedule"  style="grid-template-columns: repeat({count(instance('i-cals')/schedule)},1fr);">
-            <template>
-                <div class="header">
-                    <fx-output ref="./global/display/@value"></fx-output>
-                </div>
-                <div class="board">
-                    <fx-repeat id="agenda" ref="agenda">
-                        <template>
-                            <div class="card">
-                                <fx-output ref="period/start/@value"></fx-output>
-                                <fx-repeat id="event" class="event" ref="event">
-                                    <template>
-                                        <div class="act-text">
-                                            <fx-control ref="./name/@value"></fx-control>
-                                        </div>
-                                    </template>
-                                </fx-repeat>
-                            </div>
-                        </template>
-                    </fx-repeat>
-                </div>
-            </template>
-        </fx-repeat>
--->
         <details>
-            <summary>Globale Infos</summary>
+            <summary>
+                            <strong>{if (instance('i-cals')[./schedule]) then 'Global Infos' else 'No iCal'}</strong>
+                        </summary>
             <fx-group class="wrapit" ref="instance('i-cals')">
-            <h3>Globals</h3>
+            <fx-action event="value-changed">
+                <fx-message>value-changed</fx-message>
+                <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+            </fx-action>
             <table>
               <tr>
                 <td>
@@ -431,175 +471,310 @@
             </table>
             </fx-group>
         </details>
-        <div class="grid">
-            <fx-group ref="instance('i-cals')" class="wrapit">
-                <h3>Schedules</h3>
-                <fx-group ref="./schedule[count(.)=0]">
-                    <span>no schedule</span>
-                </fx-group>
-                <fx-repeat id="r-sched" ref="./schedule">
-                    <template>
-                    <fx-action event="item-changed">
-                        <fx-message>schedule: item-changed</fx-message>
-                    </fx-action>
-                        <div>
-                            <fx-output value="substring(./global/type/@value,1,1)"/>
-                            <fx-output ref="./global/display/@value"/>
-                            <fx-trigger class="iconbtn del">
-                                <button>X</button>
-                                <fx-action>
-                                    <fx-delete ref="."/>
-                                    <fx-setvalue ref="instance('i-control')/dirty" value="'true'"/>
-                                </fx-action>
-                            </fx-trigger>
-                        </div>
-                        <fx-refresh event="value-changed" target="schedlist" self="self"/>
-                    </template>
-                </fx-repeat>
-                <fx-group id="ssub" ref="./schedule[index('r-sched')]">
-                <table>
-                    <tr>
-                        <td>
-                            <div>
-                                <span>
-                                                    <strong>{./global/display/@value}</strong>
-                                                </span>
-                                <div>
-                                <fx-control ref="instance('selected')/schedule-type" update-event="change" selection="open">
-                                    <select class="widget">
-                                        <option value="service">Service</option>
-                                        <option value="worktime">RegAZ</option>
-                                        <option value="meeting">Meeting</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
-                                    <fx-action event="value-changed">
-                                        <fx-message>Schedule type changed</fx-message>
-                                        <fx-send submission="s-schedule-names"/>
-                                    </fx-action>
-                                </fx-control>
-                                <fx-control id="schedlist" ref="instance('selected')/schedule-ref" update-event="change">
-                                    <select ref="instance('i-schedule-list')//Schedule" class="widget" selection="open">
-                                        <template>
-                                            <option value="{./id/@value}">{./name/@value}</option>
-                                        </template>
-                                    </select>
-                                    <fx-action event="value-changed">
-                                        <fx-message>Schedule selected</fx-message>
-                                        <fx-setvalue ref="instance('i-cals')//cal/schedule[index('r-sched')]/global/reference/@value" value="concat('enahar/schedules/',instance('i-schedule-list')//Schedule[id/@value=instance('selected')/schedule-ref]/name/@value)"/>
-                                        <fx-setvalue ref="instance('i-cals')//cal/schedule[index('r-sched')]/global/display/@value" value="instance('i-schedule-list')//Schedule[id/@value=instance('selected')/schedule-ref]/name/@value"/>
-                                    </fx-action>
-                                </fx-control>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <fx-trigger>
-                                <button>Neu</button>
-                                <fx-action>
-                                    <fx-insert position="before" at="1" ref="." context="instance('i-cals')" origin="instance('i-calInfos')/bricks/schedule"/>
-                                    </fx-action>
-                            </fx-trigger>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Spezialambulanz</td>
-                        <td>
-                            <fx-control id="special" ref=".[index('r-sched')]/global/isSpecial/@value">
-                                <input id="special-check" class="widget" type="checkbox"/>
-                            </fx-control>
-                        </td>
-                    </tr> 
-                    <tr>
-                        <td>Fallführung</td>
-                        <td>
-                            <fx-control id="ff" ref=".[index('r-sched')]/global/ff/@value">
-                                <input id="ff-check" class="widget" type="checkbox"/>
-                            </fx-control>
-                        </td>
-                    </tr>
-                </table>
-                </fx-group>
-            </fx-group>
-
-            <fx-group ref="instance('i-cals')" class="wrapit">
-                <h3>Agendas</h3>
-                <fx-repeat id="r-agenda" ref="./schedule[index('r-sched')]/agenda">
-                    <template>
-                        <fx-action event="item-changed">
-                            <fx-message>agenda: item-changed</fx-message>
+        <div>
+        <h4>{if (instance('i-cals')[./schedule]) then '' else 'No '}Schedules</h4>
+        <fx-group id="sched-global" class="settings">
+                <span>
+                                <strong>{instance('i-cals')/schedule[index('r-sched')]/global/display/@value}</strong>
+                            </span>
+                    <fx-control ref="instance('selected')/schedule-type" update-event="change" selection="open">
+                        <label>Schedule types</label>
+                        <select class="widget">                                   
+                            <option value="service">Service</option>
+                            <option value="worktime">RegAZ</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="admin">Admin</option>
+                        </select>                        
+                        <fx-action event="value-changed">                               
+                            <fx-message>Schedule type changed</fx-message>              
+                            <fx-send submission="s-schedule-names"/>                    
+                        </fx-action>                                                    
+                    </fx-control>    
+                    <fx-control id="schedlist" ref="instance('selected')/schedule-ref" update-event="change">
+                        <label>Select Schedule</label>
+                        <select ref="instance('i-schedule-list')//Schedule" class="widget" selection="open"> 
+                            <template>                                                                       
+                                <option value="{./id/@value}">{./name/@value}</option>                       
+                            </template>                                                                      
+                        </select>                                                       
+                        <fx-action event="value-changed">                               
+                            <fx-message>Schedule selected</fx-message>                  
+                            <fx-setvalue ref="instance('i-cals')/schedule[index('r-sched')]/global/reference/@value">{concat('enahar/schedules/',instance('i-schedule-list')//Schedule[id/@value=instance('selected')/schedule-ref]/name/@value)}</fx-setvalue>
+                            <fx-setvalue ref="instance('i-cals')/schedule[index('r-sched')]/global/display/@value">{instance('i-schedule-list')//Schedule[id/@value=instance('selected')/schedule-ref]/name/@value}</fx-setvalue>
+                            <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
                         </fx-action>
-                        <div style="{if (exists(./period/end/@value) and ./period/end/@value!='' and ./period/end/@value &lt; instance('default')/today) then 'background-color: rgba(180, 180, 70, 0.8); transform:skewX(-20deg)' else ''}">
-                            <fx-output value="substring(./period/start/@value,1,10)"/>
-                            <fx-output value="substring(./period/end/@value,1,10)"/>
+                    </fx-control>                                                       
+            <fx-trigger ref="instance('i-cals')[./schedule]">
+                <button>Neu</button>                                                                                                 
+                <fx-action>                                                         
+                   <fx-insert position="before" at="1" ref="./schedule" context="instance('i-cals')" origin="instance('i-ical-infos')/bricks/schedule"/>
+                </fx-action>
+            </fx-trigger>                                                                                                             
+            <fx-control id="special" ref="instance('i-cals')/schedule[index('r-sched')]/global/isSpecial/@value">
+                <label>Spezialambulanz</label>
+               <input id="special-check" class="widget" type="checkbox"/>  
+                <fx-action event="value-changed">
+                    <fx-message>value-changed</fx-message>
+                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                </fx-action>
+            </fx-control>                                                              
+            <fx-control id="ff" ref="instance('i-cals')/schedule[index('r-sched')]/global/ff/@value">
+                <label>Fallführung</label>
+                <input id="ff-check" class="widget" type="checkbox"/>
+                <fx-action event="value-changed">
+                    <fx-message>value-changed</fx-message>
+                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                </fx-action>
+            </fx-control>
+        </fx-group>
+
+        <fx-repeat id="r-sched" ref="instance('i-cals')/schedule" style="grid-template-rows: repeat({count(instance('i-cals')/schedule)},1fr);">
+            <fx-action event="item-changed">
+                <fx-message>item-changed</fx-message>
+                <fx-refresh control="sched-global"/>
+            </fx-action>
+            <fx-action event="value-changed">
+                <fx-message>value-changed</fx-message>
+                <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+            </fx-action>
+            <template>
+
+                <details>
+                <summary>{./global/display/@value}</summary>
+                <div class="schedule">
+                    <fx-repeat id="r-agenda" ref="agenda">
+                        <fx-action event="item-changed">
+                            <fx-refresh control="sched-global"/>
+                        </fx-action>
+                        <template>
+
+                        <details>
+                        <summary style="{if (exists(./period/end) and ./period/end/@value &lt; instance('default')/today) then 'background-color: rgba(180, 180, 70, 0.8); transform:skewX(-20deg)' else ''}">{if (./period/start) then substring(./period/start/@value,1,10) else '∞'} -&gt; {if (./period/end) then substring(./period/end/@value,1,10) else '∞'}
                             <fx-trigger class="iconbtn del">
                                 <button>X</button>
                                 <fx-action>
                                     <fx-delete ref="."/>
-                                    <fx-setvalue ref="instance('i-control')/dirty" value="'true'"/>
+                                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
                                 </fx-action>
                             </fx-trigger>
-                        </div>
-                    </template>
-                </fx-repeat>
-                <table>
-                        <tr>
-                            <td>
-                                <fx-trigger>
-                                    <button>Neu</button>
-                                    <fx-action>
-                                        <fx-insert position="after" at="index('r-agenda')" ref="instance('i-cals')/schedule[index('r-sched')]/agenda" context="instance('i-cals')/schedule[index('r-sched')]" origin="instance('i-calInfos')/bricks/agenda"/>
-                                    </fx-action>
-                                </fx-trigger>
-                            </td>
-                            <td>
-                                <fx-trigger ref="instance('i-control')/has-agenda">
-                                    <button>Clone</button>
-                                    <fx-action>
-                                        <fx-insert position="after" at="index('r-agenda')" ref="[./owner/reference/@value=instance('selected')/selected]/schedule[index('r-sched')]/agenda" origin="[./owner/reference/@value=instance('selected')/selected]/schedule[index('r-sched')]/agenda[index('r-agenda')]"/>
-                                </fx-action>
-                            </fx-trigger>
-                        </td>
-                    </tr>
-                </table>
-            </fx-group>
-            <fx-group ref="instance('i-cals')" class="wrapit">
-                <h3>Events</h3>
-                <fx-repeat id="r-event" ref="./schedule[index('r-sched')]/agenda[index('r-agenda')]/event">
-                    <template>
-                            <fx-action event="item-changed">
-                                <fx-message>event: item-changed</fx-message>
-                            </fx-action>
+                        </summary>
                         <div>
-                            <fx-output value="./name/@value"/>
-                            <fx-trigger class="iconbtn del">
+                            <div class="settings">
+                		    <div>
+                		        <fx-control ref="./period/start/@value" update-event="input">
+                                    <label for="a-start">Von</label>
+            			            <input id="a-start" class="widget" type="date"/>
+                	    		</fx-control>
+                				<fx-trigger ref="./period[not(./start)]">
+                                    <button>Von?</button>
+                                    <fx-insert ref="./period/start" context="./period" origin="instance('helper')/period/start"/>
+                                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                                </fx-trigger>
+            			        <fx-trigger ref="./period/start">
+                                    <button>x</button>
+                                    <fx-delete ref="./period/start"/>
+                                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                                </fx-trigger>
+                            </div>
+            	    		<div>
+            		            <fx-control ref="./period/end/@value" update-event="input">
+                                    <label for="a-end">Bis</label>
+                		    	    <input id="a-end" class="widget" type="date"/>
+                    			</fx-control>
+            				    <fx-trigger ref="./period[not(./end)]">
+                                    <button>Bis?</button>
+                                    <fx-insert ref="./period/end" context="./period" origin="instance('helper')/period/end"/>
+                                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                                </fx-trigger>
+            			    	<fx-trigger ref="./period/end">
+                                    <button>x</button>
+                                    <fx-delete ref="./period/end"/>
+                                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                                </fx-trigger>
+            	    		</div>
+                            </div>
+                        <fx-repeat id="r-event" class="event" ref="event">
+                        <fx-action event="item-changed">
+                        </fx-action>
+                        <template>
+                        <details>
+                        <summary>{./name/@value}</summary>
+                        <div class="event settings">
+                            <fx-control ref="./name/@value" update-event="input">
+                                <label for="e-name">Name</label>
+    		    	            <input id="e-name" class="widget"/>
+        			        </fx-control>
+                            <fx-control ref="./start/@value" update-event="input">
+                                <label for="e-start">Von</label>
+    		    	            <input id="e-start" class="widget" type="time"/>
+        			        </fx-control>
+                            <fx-control ref="./end/@value" update-event="input">
+                                <label for="e-end">Bis</label>
+    		    	            <input id="e-end" class="widget" type="time"/>
+        			        </fx-control>
+        			    </div>
+                        <details>
+            	    	<summary>Note</summary>
+		                    <fx-control ref="./note">
+                                <textarea id="evt-note" cols="40" rows="4" class="widget"/>
+                            </fx-control>
+	            	    </details>
+<details open="open">
+    <summary id="rrule-summary">
+        <span>{if (count(./rrule)=0) then "No " else " "}RRules</span>
+        <fx-trigger ref=".[count(rrule)=0]" class="iconbtn">
+                <button title="fügt RRule hinzu">+</button>
+                <fx-action>
+                    <fx-insert ref="./rrule" context="." origin="instance('i-ical-infos')/bricks/rrule"/>
+                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                </fx-action>
+        </fx-trigger>
+        <fx-trigger ref=".[count(rrule)&gt;0]" class="iconbtn">
+                <button title="löscht RRule">X</button>
+                <fx-action>
+                    <fx-delete ref="./rrule"/>
+                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                </fx-action>
+        </fx-trigger>
+    </summary>
+        <fx-group ref="./rrule" class="event settings">
+            <fx-control id="rrule-freq" ref="./freq/@value" update-event="change">
+                <label>Frequenz</label>
+                <select class="widget" ref="instance('i-ical-infos')/rrule/freq">
+                    <template>
+                        <option value="{./@value}">{./@label}</option>
+                    </template>
+                </select>
+            </fx-control>
+            <fx-control id="rrule-week" ref="./byWeekNo/@value" update-event="input">
+                <label>byWeek</label>
+            </fx-control>
+            <fx-control id="rrule-byday" ref="./byDay/@value" update-event="input">
+                <label>byDay</label>
+                <textarea col="40" rows="3" class="widget"/>
+            </fx-control>
+        </fx-group>
+
+</details>
+
+<details>
+    <summary>
+        <span>{if (count(./rdate)=0) then "No " else ""}RDates</span>
+        <fx-trigger ref=".[count(rdate)=0]" class="iconbtn">
+                <button title="fügt RDate hinzu">+</button>
+                <fx-action>
+                    <fx-insert ref="./rdate" context="." origin="instance('i-ical-infos')/bricks/rdate"/>
+                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                </fx-action>
+        </fx-trigger>
+        <fx-trigger ref=".[count(rdate)&gt;0]" class="iconbtn">
+                <button title="löscht RDate">X</button>
+                <fx-action>
+                    <fx-delete ref="./rdate"/>
+                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                </fx-action>
+        </fx-trigger>
+    </summary>
+    <div>
+        <table>
+            <tr>
+                <td>
+                    <fx-repeat id="r-rdate" ref="./rdate/date">
+                        <template>
+                            <div>
+    
+                                <fx-control id="rdate-date" ref="./@value">
+                                    <input type="date" class="widget"/>
+                                </fx-control>
+                                <fx-trigger class="iconbtn delRDate">
+                                    <button>X</button>
+                                    <fx-delete ref="."/>
+                                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                                </fx-trigger>
+    
+                            </div>
+                        </template>
+                    </fx-repeat>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <fx-trigger ref="./rdate" class="">
+                        <button>Neu</button>
+                        <fx-action>
+                            <fx-insert at="1" position="before" ref="./date" context="." origin="instance('i-ical-infos')/bricks/rdate/date"/>
+                            <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                            <fx-setfocus control="rdate-date"/>
+                        </fx-action>
+                    </fx-trigger>
+                </td>
+            </tr>
+        </table>
+    </div>
+    </details>
+    <details>
+    <summary>
+        <span>{if (count(./exdate)=0) then "No " else " "}ExDates</span>
+            <fx-trigger ref=".[count(exdate)=0]" class="iconbtn">
+                <button title="fügt ExDate hinzu">+</button>
+                <fx-action>
+                    <fx-insert ref="./exdate" context="." origin="instance('i-ical-infos')/bricks/exdate"/>
+                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                </fx-action>
+            </fx-trigger>
+            <fx-trigger ref=".[count(exdate)&gt;0]" class="iconbtn">
+                <button title="löscht ExDate">X</button>
+                <fx-action>
+                    <fx-delete ref="./exdate"/>
+                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                </fx-action>
+            </fx-trigger>
+    </summary>
+    <div>
+        <table>
+            <tr>
+                <td>
+                    <fx-repeat id="r-exdate" ref="./exdate/date">
+                        <template>
+                            <fx-control ref="./@value">
+                                <input id="exdate-date" type="date" class="widget"/>
+                            </fx-control>
+                            <fx-trigger class="iconbtn delRDate">
                                 <button>X</button>
                                 <fx-action>
                                     <fx-delete ref="."/>
-                                    <fx-setvalue ref="instance('i-control')/dirty" value="'true'"/>
+                                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
                                 </fx-action>
                             </fx-trigger>
-                        </div>
+                        </template>
+                    </fx-repeat>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <fx-trigger ref="./exdate">
+                        <button>Neu</button>
+                        <fx-action>
+                            <fx-insert at="1" positiom="before" ref="./date" context="." origin="instance('i-ical-infos')/bircks/exdate/date"/>
+                            <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                        </fx-action>
+                    </fx-trigger>
+                </td>
+            </tr>
+        </table>
+    </div>
+    </details>
+                        </details>
+                        </template>
+                        </fx-repeat>
+                    </div>
+                    </details>
                     </template>
-                </fx-repeat>
-
-                <table>
-                        <tr>
-                            <td>
-                                <fx-trigger>
-                                    <button>Neu</button>
-                                    <fx-action>
-                                        <fx-insert position="after" at="index('r-event')" ref="instance('i-cals')/schedule[index('r-sched')]/agenda[index('r-agenda')]/event" context="instance('i-cals')/schedule[index('r-sched')]/agenda[index('r-agenda')]" origin="instance('i-calInfos')/bricks/event"/>
-                                    </fx-action>
-                                </fx-trigger>
-                            </td>
-                        </tr>
-                </table>
-            </fx-group>
-
-            <fx-group class="wrapit">
-                <fx-control id="fevent" ref="instance('i-cals')/schedule[index('r-sched')]/agenda[index('r-agenda')]/event[index('r-event')]" src="event.html" initial=".">
-                </fx-control>
-            </fx-group>
+                    </fx-repeat>
+                </div>
+                </details>
+            </template>
+        </fx-repeat>
 
         </div>
         </section>
