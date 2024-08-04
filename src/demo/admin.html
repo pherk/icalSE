@@ -245,6 +245,7 @@ div.settings  label:after { content: ":"; }
                 <data>
                     <dirty>false</dirty>
                     <save-trigger/>
+<!--
                     <has-schedule/>
                     <has-agenda/>
                     <has-event/>
@@ -252,6 +253,7 @@ div.settings  label:after { content: ":"; }
                     <no-agenda/>
                     <no-event/>  
                     <has-rdate/>
+-->
                 </data>
             </fx-instance>
 
@@ -324,7 +326,8 @@ div.settings  label:after { content: ":"; }
                 <!-- template expressions can used builtin and custom functions and access pathes in your
                 instance data with the help of the 'instance()' function. Without args it returns the first
                 in document order which is always the default.-->
-                <p>New version of <strong>eNahar ICal manager</strong> using (Fore instead of Betterforms)</p>
+                <p>New eNahar <strong>ICal manager</strong>
+                        </p>
             </div>
 
             <div class="gridh">
@@ -471,9 +474,9 @@ div.settings  label:after { content: ":"; }
             </table>
             </fx-group>
         </details>
-        <div>
+        <div id="sched-list">
         <h4>{if (instance('i-cals')[./schedule]) then '' else 'No '}Schedules</h4>
-        <fx-group id="sched-global" class="settings">
+        <div id="sched-select" class="settings">
                 <span>
                                 <strong>{instance('i-cals')/schedule[index('r-sched')]/global/display/@value}</strong>
                             </span>
@@ -489,8 +492,9 @@ div.settings  label:after { content: ":"; }
                             <fx-message>Schedule type changed</fx-message>              
                             <fx-send submission="s-schedule-names"/>                    
                         </fx-action>                                                    
-                    </fx-control>    
-                    <fx-control id="schedlist" ref="instance('selected')/schedule-ref" update-event="change">
+                    </fx-control>
+<!--
+                    <fx-control id="all-scheds" ref="instance('selected')/schedule-ref" update-event="change">
                         <label>Select Schedule</label>
                         <select ref="instance('i-schedule-list')//Schedule" class="widget" selection="open"> 
                             <template>                                                                       
@@ -503,49 +507,56 @@ div.settings  label:after { content: ":"; }
                             <fx-setvalue ref="instance('i-cals')/schedule[index('r-sched')]/global/display/@value">{instance('i-schedule-list')//Schedule[id/@value=instance('selected')/schedule-ref]/name/@value}</fx-setvalue>
                             <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
                         </fx-action>
-                    </fx-control>                                                       
-            <fx-trigger ref="instance('i-cals')[./schedule]">
-                <button>Neu</button>                                                                                                 
-                <fx-action>                                                         
-                   <fx-insert position="before" at="1" ref="./schedule" context="instance('i-cals')" origin="instance('i-ical-infos')/bricks/schedule"/>
-                </fx-action>
-            </fx-trigger>                                                                                                             
-            <fx-control id="special" ref="instance('i-cals')/schedule[index('r-sched')]/global/isSpecial/@value">
-                <label>Spezialambulanz</label>
-               <input id="special-check" class="widget" type="checkbox"/>  
-                <fx-action event="value-changed">
-                    <fx-message>value-changed</fx-message>
-                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
-                </fx-action>
-            </fx-control>                                                              
-            <fx-control id="ff" ref="instance('i-cals')/schedule[index('r-sched')]/global/ff/@value">
-                <label>Fallführung</label>
-                <input id="ff-check" class="widget" type="checkbox"/>
-                <fx-action event="value-changed">
-                    <fx-message>value-changed</fx-message>
-                    <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
-                </fx-action>
-            </fx-control>
-        </fx-group>
-
-        <fx-repeat id="r-sched" ref="instance('i-cals')/schedule" style="grid-template-rows: repeat({count(instance('i-cals')/schedule)},1fr);">
-            <fx-action event="item-changed">
-                <fx-message>item-changed</fx-message>
-                <fx-refresh control="sched-global"/>
+                    </fx-control>     
+-->
+                <fx-trigger ref="instance('i-cals')[./schedule]">
+                    <button>Neu</button>                                                                                                 
+                    <fx-action>                                                         
+                       <fx-insert position="before" at="1" ref="./schedule" context="instance('i-cals')" origin="instance('i-ical-infos')/bricks/schedule"/>
+                    </fx-action>
+                </fx-trigger>                                                                                                             
+        </div>
+        <fx-repeat id="r-sched" ref="instance('i-cals')/schedule" style="display: grid; grid-template-rows: repeat({count(instance('i-cals')/schedule)},1fr);">
+<!--
+            <fx-action event="item-changed" target="r-sched">
+                <fx-message>schedule: item-changed; 1 index: {event('index')}</fx-message>
             </fx-action>
+-->
+            <template>
+                <div>
+
             <fx-action event="value-changed">
-                <fx-message>value-changed</fx-message>
+                <fx-message>s: value-changed</fx-message>
                 <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
             </fx-action>
-            <template>
+                    <div class="header">{./global/display/@value}</div>
 
-                <details>
-                <summary>{./global/display/@value}</summary>
-                <div class="schedule">
+
+                    <div class="settings">
+                        <fx-control id="special" ref="./global/isSpecial/@value">
+                            <label>Spezialambulanz</label>
+                            <input id="special-check" class="widget" type="checkbox"/>  
+                            <fx-action event="value-changed">
+                                <fx-message>s1: value-changed</fx-message>
+                                <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                            </fx-action>
+                        </fx-control>
+                        <fx-control id="ff" ref="./global/ff/@value">
+                            <label>Fallführung</label>
+                            <input id="ff-check" class="widget" type="checkbox"/>
+                            <fx-action event="value-changed">
+                                <fx-message>s2: value-changed</fx-message>
+                                <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                            </fx-action>
+                        </fx-control>
+                    </div>
+
                     <fx-repeat id="r-agenda" ref="agenda">
+<!--
                         <fx-action event="item-changed">
-                            <fx-refresh control="sched-global"/>
+                            <fx-message>agenda: item-changed</fx-message>
                         </fx-action>
+-->
                         <template>
 
                         <details>
@@ -558,7 +569,7 @@ div.settings  label:after { content: ":"; }
                                 </fx-action>
                             </fx-trigger>
                         </summary>
-                        <div>
+                        <div class="agenda">
                             <div class="settings">
                 		    <div>
                 		        <fx-control ref="./period/start/@value" update-event="input">
@@ -593,8 +604,9 @@ div.settings  label:after { content: ":"; }
                                 </fx-trigger>
             	    		</div>
                             </div>
+<!--
                         <fx-repeat id="r-event" class="event" ref="event">
-                        <fx-action event="item-changed">
+                        <fx-action event="event: item-changed">
                         </fx-action>
                         <template>
                         <details>
@@ -676,9 +688,6 @@ div.settings  label:after { content: ":"; }
         </fx-trigger>
     </summary>
     <div>
-        <table>
-            <tr>
-                <td>
                     <fx-repeat id="r-rdate" ref="./rdate/date">
                         <template>
                             <div>
@@ -695,10 +704,6 @@ div.settings  label:after { content: ":"; }
                             </div>
                         </template>
                     </fx-repeat>
-                </td>
-            </tr>
-            <tr>
-                <td>
                     <fx-trigger ref="./rdate" class="">
                         <button>Neu</button>
                         <fx-action>
@@ -707,9 +712,6 @@ div.settings  label:after { content: ":"; }
                             <fx-setfocus control="rdate-date"/>
                         </fx-action>
                     </fx-trigger>
-                </td>
-            </tr>
-        </table>
     </div>
     </details>
     <details>
@@ -731,9 +733,6 @@ div.settings  label:after { content: ":"; }
             </fx-trigger>
     </summary>
     <div>
-        <table>
-            <tr>
-                <td>
                     <fx-repeat id="r-exdate" ref="./exdate/date">
                         <template>
                             <fx-control ref="./@value">
@@ -748,10 +747,6 @@ div.settings  label:after { content: ":"; }
                             </fx-trigger>
                         </template>
                     </fx-repeat>
-                </td>
-            </tr>
-            <tr>
-                <td>
                     <fx-trigger ref="./exdate">
                         <button>Neu</button>
                         <fx-action>
@@ -759,23 +754,20 @@ div.settings  label:after { content: ":"; }
                             <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
                         </fx-action>
                     </fx-trigger>
-                </td>
-            </tr>
-        </table>
     </div>
     </details>
                         </details>
                         </template>
                         </fx-repeat>
+-->
                     </div>
                     </details>
                     </template>
                     </fx-repeat>
                 </div>
-                </details>
             </template>
-        </fx-repeat>
 
+        </fx-repeat>
         </div>
         </section>
     </fx-fore>
