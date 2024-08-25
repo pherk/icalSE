@@ -1,0 +1,47 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes" name="viewport"/>
+    <title>repeat test</title>
+    <link href="../resources/css/fore.css" rel="stylesheet"/>
+    <style>
+        [repeat-index] {
+            background-color : yellow;
+        }
+    </style>
+</head>
+<body>
+    <fx-fore>
+        <fx-model>
+            <fx-message event="model-construct-done">event model ready</fx-message>
+            <fx-instance>
+                <data>
+                    <sub value="result1"/>
+                    <sub value="result2"/>
+                    <sub value="result3"/>
+                    <sub value="result4"/>
+                    <sub value="result5"/>
+                    <sub value="result6"/>
+                </data>
+            </fx-instance>
+        </fx-model>
+        
+        <fx-repeat id="r-sub" ref="sub">
+<!--
+            <fx-message event="item-changed" target="r-sub">Index Changed(1): {event('index')}</fx-message>
+            <fx-action event="item-changed" target="r-sub">
+                <fx-message>Index changed(2): {event('index')}</fx-message>
+            </fx-action>
+            <fx-action event="item-changed" target="r-sub">
+                <fx-message>Index changed(3): {event('index')}</fx-message>
+            </fx-action>
+-->
+            <template>
+                <fx-message event="item-changed" target="r-sub">Index Changed(4): {event('index')}</fx-message>
+                <fx-output ref="./@value"/>
+            </template>
+        </fx-repeat>
+      </fx-fore>
+	<script type="module" src="../resources/script/fore-dev.js"/>
+  </body>
+</html>

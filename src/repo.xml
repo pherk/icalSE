@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <meta xmlns="http://exist-db.org/xquery/repo">
-    <description>Scheduler for Nabu</description>
+    <description>iCal for Nabu</description>
     <author>Peter Herkenrath</author>
     <website>http://www.enahar.org</website>
     <status>unstable</status>
@@ -14,8 +14,8 @@
     <repo:license xmlns:repo="http://exist-db.org/xquery/repo">CC-BY-NC-ND</repo:license>
     <repo:copyright xmlns:repo="http://exist-db.org/xquery/repo">true</repo:copyright>
     <repo:type xmlns:repo="http://exist-db.org/xquery/repo">application</repo:type>
-    <repo:target xmlns:repo="http://exist-db.org/xquery/repo">eNaharPro</repo:target>
+    <repo:target xmlns:repo="http://exist-db.org/xquery/repo">iCalSE</repo:target>
     <repo:prepare xmlns:repo="http://exist-db.org/xquery/repo">pre-install.xql</repo:prepare>
 
-<repo:deployed xmlns:repo="http://exist-db.org/xquery/repo">2018-12-01T08:36:54.351+01:00</repo:deployed>
+<repo:deployed xmlns:repo="http://exist-db.org/xquery/repo">2024-09-01T08:36:54.351+01:00</repo:deployed>
 </meta>

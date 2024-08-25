@@ -30,7 +30,7 @@ else if(starts-with($exist:path, "/doc")) then
             <set-header name="Cache-Control" value="max-age=31536000"/>
         </forward>
     </dispatch>
-else if(starts-with($exist:path, "/demo")) then
+else if(starts-with($exist:path, "/ical")) then
     <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
         <forward url="{$exist:controller}/{$exist:path}">
             <set-header name="Cache-Control" value="max-age=31536000"/>

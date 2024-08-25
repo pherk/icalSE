@@ -1,0 +1,155 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes" name="viewport"/>
+
+    <title>ExDate</title>
+    <link href="../resources/css/fore.css" rel="stylesheet"/>
+
+    <style>
+        body, .wrapper {
+          margin: 0;
+          padding: 0;
+        }
+        .wrapper {
+          width: 21cm;
+          height: 29.7cm;
+          background: lightyellow;
+          position: relative;
+        }
+        [repeat-index]{
+            background: rgba(255,255,70,0.5);
+        }
+        #r-exdate{
+            display: grid !important;
+            grid-template-columns: repeat(3,1fr);
+            grid-column-gap: 3rem;
+            grid-row-gap: 1rem;
+            width: 100%;
+        }
+        #r-exdate &gt; fx-repeatitem {
+            /*background: rgba(255,255,255,0.5);*/
+            border:thin solid blue;
+            position: relative;
+            min-width: 5rem;
+            padding:0.5rem 0.25rem;
+        }
+        #r-exdate .header &gt; fx-control{
+            width: calc(100% - 5rem);
+        }
+        .iconbtn{
+            grid-area: icon;
+        }
+        .iconbtn{
+            position: absolute;
+            right:1rem;
+        }
+        .iconbtn button:hover{
+            background: grey;
+            color:white;
+        }
+        .delRDate{
+            right: -2rem;
+            position: absolute;
+        }
+        .iconbtn button{
+            border-radius: 50%;
+            border:none;
+            color:black;
+            background: white;
+        }
+        .addRDate{
+            right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+  <div class="wrapper">
+    <fx-fore>
+        <fx-message event="ready">ExDate ready</fx-message>
+
+        <fx-model>
+          <fx-message event="model-construct-done">event model ready</fx-message>
+          
+          <fx-instance>
+            <data>
+                <event>
+                    <name value="amb-???"/>
+                    <summary value=""/>
+                    <description value=""/>
+                    <period>
+                    </period>
+                    <note value=""/>
+                    <exdate>
+                        <date value=""/>
+                    </exdate>
+                </event>
+            </data>
+          </fx-instance>
+          
+          <fx-instance id="i-helper">
+            <data>
+                <exdate>
+                    <date value=""/>
+                </exdate>
+            </data>
+          </fx-instance>
+          
+    </fx-model>
+    <details>
+    <fx-return ref="." event="value-changed"/>
+    <summary>
+        <span>{if (count(./event/exdate)=0) then "keine " else " "}ExDates</span>
+            <fx-trigger ref="./event[count(exdate)=0]" class="iconbtn">
+                <button title="fügt ExDate hinzu">+</button>
+                <fx-action>
+                    <fx-insert ref="./exdate" context="." origin="instance('i-helper')/exdate"/>
+                </fx-action>
+            </fx-trigger>
+            <fx-trigger ref="./event[count(exdate)&gt;0]" class="iconbtn">
+                <button title="löscht ExDate">X</button>
+                <fx-action>
+                    <fx-delete ref="./exdate"/>
+                </fx-action>
+            </fx-trigger>
+    </summary>
+    <fx-group ref="./event/exdate">
+        <table>
+            <tr>
+                <td>
+                    <fx-repeat id="r-exdate" ref="./date">
+                        <template>
+                            <fx-control ref="./@value">
+                                <input id="exdate-date" type="date"/>
+                            </fx-control>
+                            <fx-trigger class="iconbtn delRDate">
+                                <button>X</button>
+                                <fx-action>
+                                    <fx-delete ref="."/>
+                                </fx-action>
+                            </fx-trigger>
+                        </template>
+                    </fx-repeat>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <fx-trigger>
+                        <button>Neu</button>
+                        <fx-action>
+                            <fx-insert at="1" positiom="before" ref="./date" context="." origin="instance('i-helper')/exdate/date"/>
+                        </fx-action>
+                    </fx-trigger>
+                </td>
+            </tr>
+        </table>
+    </fx-group>
+
+    </details>
+  </fx-fore>
+
+
+	</div>
+	<script type="module" src="../resources/script/fore-dev.js"/>
+  </body>
+</html>
