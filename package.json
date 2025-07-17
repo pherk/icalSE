@@ -1,7 +1,7 @@
 {
-  "name": "eNaharPro",
+  "name": "iCalSE",
   "version": "0.1.0",
-  "description": "New eNahar eXist-db",
+  "description": "New iCal eXist-db",
   "scripts": {
     "test": "gulp install:all && mocha --exit",
     "test:watch": "mocha --watch",

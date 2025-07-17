@@ -15,11 +15,11 @@ import module namespace functx =  "http://www.functx.com" at "../modules/functx.
 
 import module namespace config = "http://enahar.org/exist/apps/enahar/config" at "../modules/config.xqm";
 (: provides highest, lowest, sort :)
-import module namespace xxpath = "http://enahar.org/lib/xxpath";
-import module namespace ical  = "http://enahar.org/lib/ical";
-import module namespace ice   = "http://enahar.org/lib/ice";
+import module namespace xxpath = "http://eNahar.org/ns/lib/xxpath";
+import module namespace ical  = "http://eNahar.org/ns/lib/ical";
+import module namespace ice   = "http://eNahar.org/ns/lib/ice";
 
-import module namespace xqtime= "http://enahar.org/lib/xqtime";
+import module namespace xqtime= "http://eNahar.org/ns/lib/xqtime";
 
 import module namespace cal-util = "http://enahar.org/exist/apps/enahar/cal-util" at "../schedule/cal-utils.xqm";
 

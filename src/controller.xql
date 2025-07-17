@@ -42,12 +42,6 @@ else if(starts-with($exist:path, "/resources")) then
             <set-header name="Cache-Control" value="max-age=31536000"/>
         </forward>
     </dispatch>
-else if(starts-with($exist:path, "/pages")) then
-    <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
-        <forward url="{$exist:controller}/{$exist:path}">
-            <set-header name="Cache-Control" value="no-cache"/>
-        </forward>
-    </dispatch>
 
 (: static HTML page for API documentation should be served directly to make sure it is always accessible :)
 else if ($exist:path = ("/api.html","/api.json", "/index.html")) then

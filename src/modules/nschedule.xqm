@@ -3,7 +3,7 @@ xquery version "3.1";
 module namespace nschedule="https://eNahar.org/ns/ical/nschedule";
 
 import module namespace roaster="http://e-editiones.org/roaster";
-import module namespace cal-util     = "http://enahar.org/ns/ical/util" at "../modules/cal-util.xqm";
+import module namespace mutil  = "http://eNahar.org/ns/iCal/util" at "../modules/mutils.xqm";
 
 declare namespace fhir   = "http://hl7.org/fhir";
 
@@ -83,5 +83,5 @@ declare function nschedule:search-schedule($request as map(*)){
                 </Schedule>
             else $c
     return
-        cal-util:resources2Bundle($sorted-hits)
+        mutil:prepareResourceBundleXML($sorted-hits, 1, "*")
 };
