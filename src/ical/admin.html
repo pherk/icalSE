@@ -220,23 +220,23 @@ div.settings  label:after { content: ":"; }
             
             <!-- submissions send http requests. This one loads all ical owners with a GET request and
             replace our ical-list instance with the response data. -->
-            <fx-submission id="s-load-names" url="../ICal?_elements=id,owner&amp;group=arzt&amp;active=true" method="get" replace="instance" targetref="instance('i-ical-list')">
+            <fx-submission id="s-load-names" url="http://localhost:8080/exist/apps/nonfhir/ICal?_elements=id,owner&amp;group=arzt&amp;active=true" method="get" replace="instance" targetref="instance('i-ical-list')" mediatype="application/fhir+xml">
                 <fx-message event="submit-error">could not load ical owners</fx-message>
                 <fx-message event="submit-done">ical owners loaded</fx-message>
             </fx-submission>
-             <fx-submission id="s-schedule-names" url="../Schedule?_elements=id,type,name,ff&amp;active=true&amp;type={instance('selected')/schedule-type}" method="get" replace="instance" targetref="instance('i-schedule-list')">
+             <fx-submission id="s-schedule-names" url="http://localhost:8080/exist/apps/nonfhir/ICal?_elements=id,type,name,ff&amp;active=true&amp;type={instance('selected')/schedule-type}" method="get" replace="instance" targetref="instance('i-schedule-list')" mediatype="application/fhir+xml">
                 <fx-message event="submit-error">could not load schedules</fx-message>
                 <fx-message event="submit-done">schedules loaded</fx-message>
             </fx-submission>
             
             <!-- this one loads ical of selected owner with a GET request and replace our i-cal instance with the response data. -->
-            <fx-submission id="s-read-ical" url="../ICal/{instance('selected')/selected}" method="get" replace="instance" targetref="instance('i-cals')">
+            <fx-submission id="s-read-ical" url="http://localhost:8080/exist/apps/nonfhir/ICal/{instance('selected')/selected}" method="get" replace="instance" targetref="instance('i-cals')" mediatype="application/fhir+xml">
                 <fx-message event="submit-error">could not load ical</fx-message>
                 <fx-message event="submit-done">ical loaded</fx-message>
             </fx-submission>
 
             <!-- this submission saves the current ical with a PUT request to the ICal API. -->
-            <fx-submission id="s-save" url="../ICal" method="put" replace="none" nonrelevant="keep">
+            <fx-submission id="s-save" url="http://localhost:8080/exist/apps/nonfhir/ICal/{instance('selected')/selected}" method="put" replace="none" nonrelevant="keep" mediatype="application/fhir+xml">
                 <fx-message event="submit-error">ical for {instance('i-cals')/owner/display/@value} could not stored</fx-message>
                 <fx-message event="submit-done">ical for {instance('i-cals')/owner/display/@value} stored</fx-message>
             </fx-submission>
@@ -297,7 +297,7 @@ div.settings  label:after { content: ":"; }
         <nav> 
             <ul> 
                 <li>
-                            <a class="active" href="#">eNaharPro Admin</a>
+                            <a class="active" href="#">eNahar Admin</a>
                         </li> 
                 <li>
                             <a href="#">Menu</a>
@@ -326,7 +326,7 @@ div.settings  label:after { content: ":"; }
                 <!-- template expressions can used builtin and custom functions and access pathes in your
                 instance data with the help of the 'instance()' function. Without args it returns the first
                 in document order which is always the default.-->
-                <p>New eNahar <strong>ICal manager</strong>
+                <p>eNahar <strong>ICal manager</strong>
                         </p>
             </div>
 

@@ -10,7 +10,7 @@ declare function nauth:login(
         $request as map(*)
     ) as map(*)
 {
-    let $lll:= util:log-app("ERROR","exist.core", $request)
+    let $lll:= util:log-app("ERROR","nabu.apps", $request)
     let $user := $request?body?user
     return
     if (string-length($user)>0)

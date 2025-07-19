@@ -12,8 +12,6 @@ import module namespace router="http://e-editiones.org/roaster/router";
 
 
 import module namespace nauth = "https://eNahar.org/ns/ical/nauth" at "nauth.xqm";
-import module namespace nical = "https://eNahar.org/ns/ical/nical" at "nical.xqm";
-import module namespace nschedule = "https://eNahar.org/ns/ical/nschedule" at "nschedule.xqm";
 
 
 (:~
