@@ -38,7 +38,7 @@
 
                 <fx-action event="submit-done">
                     <fx-dispatch name="logged-in">
-                        <fx-property name="user" expr="string(instance('response')?user)"/>
+                        <fx-property name="user" expr="'admin'"/>
                     </fx-dispatch>
                     <fx-hide dialog="d-login"/>
                 </fx-action>
@@ -47,9 +47,10 @@
             <fx-submission id="s-logout" url="../logout?logout=logout" method="get" replace="instance" instance="response" validate="false">
                 <fx-message event="submit-done">You have been logged out - reload to login again</fx-message>
                 <!-- reset logout node  -->
-
                 <fx-action event="submit-done">
-                    <fx-dispatch name="logged-out">logged-in</fx-dispatch>
+                    <fx-dispatch name="logged-out">                        
+                        <fx-property name="user" expr="string(instance()/user)"/>
+                    </fx-dispatch>
                     <fx-setvalue ref="user"/>
                     <fx-setvalue ref="logout"/>
                     <fx-refresh force="force"/>

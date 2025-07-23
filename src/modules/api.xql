@@ -98,4 +98,11 @@ declare function api:lookup ($name as xs:string) {
     function-lookup(xs:QName($name), 1)
 };
 
-roaster:route($api:definitions, api:lookup#1)
+declare function api:id($request, $response) {
+    $request,
+    $response
+};
+(: switched out default auth
+ : roaster:route($api:definitions, api:lookup#1)
+:)
+roaster:route($api:definitions, api:lookup#1, api:id#2)

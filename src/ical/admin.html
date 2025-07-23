@@ -134,7 +134,7 @@ div.settings  label:after { content: ":"; }
         the focus to the control with id 'task'. -->
         <fx-setfocus control="provider" event="ready"/>
 
-        <!-- listening on document for an 'logged-in' event, storing the username and loading the todos of the user.  -->
+        <!-- listening on document for an 'logged-in' event, storing the username and loading initial data.  -->
         <fx-action event="logged-in" target="#document">
             <fx-setvalue ref="instance()/@user" value="event('user')"/>
             <fx-update/>
@@ -146,6 +146,8 @@ div.settings  label:after { content: ":"; }
         <fx-action event="logged-out" target="#document">
             <fx-message>logged out {event('user')}</fx-message>
             <fx-setvalue ref="instance()/@user"/>
+            <fx-update/>
+            <fx-refresh/>
         </fx-action>
 
         <fx-model>
@@ -772,5 +774,6 @@ div.settings  label:after { content: ":"; }
         </section>
     </fx-fore>
 </div>
+<fx-lens/>
 </body>
 </html>
