@@ -1,0 +1,24 @@
+<Bundle xmlns="http://hl7.org/fhir">
+    <id value="bundle-example"/>
+    <meta>
+        <lastUpdated value="2025-07-26T18:35:48"/>
+    </meta>
+    <type value="searchset"/>
+    <total value="1"/>
+    <entry>
+        <fullUrl value=""/>
+        <resource>
+            <ICal>
+                <id value="cal-u-pmh"/>
+                <actor>
+                    <reference value="Practitioner/u-pmh"/>
+                    <display value="Herkenrath"/>
+                </actor>
+            </ICal>
+        </resource>
+        <search>
+            <mode value="match"/>
+            <score value="1"/>
+        </search>
+    </entry>
+</Bundle>

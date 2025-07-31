@@ -8,7 +8,10 @@
     <link rel="stylesheet" href="../resources/css/fore.css" media="screen"/>
     <link rel="stylesheet" href="../resources/css/edep-theme.css"/>
     <link rel="stylesheet" href="../resources/css/edep-theme2.css"/>
-
+    <script type="module">
+        import '@polymer/iron-iconset-svg/iron-iconset-svg.js';
+        import '@polymer/iron-icon/iron-icon.js';
+    </script>
     <script type="module" src="../resources/scripts/jinn-codemirror-bundle.js"/>
 <!--    <script type="module" src="http://localhost:8090/index.js"></script>-->
     <script type="module" src="../resources/scripts/fore-dev.js"/>
@@ -33,22 +36,30 @@
             color:black;
             background: white;
         }
-fx-group.settings {
-    display:grid;
-    grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: 1fr auto;
-    grid-gap:5px;
-}
-fx-group.settings  label       { text-align:right; }
-fx-group.settings  label:after { content: ":"; }
-div.settings {
-    display:grid;
-    grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: 1fr auto;
-    grid-gap:5px;
-}
-div.settings  label       { text-align:right; }
-div.settings  label:after { content: ":"; }
+
+ul{
+ background-color: #ff4081;
+ margin: 0px;
+ padding: 0px;
+ overflow: hidden;
+ list-style-type: none;
+ } 
+li a:hover:not(.active){
+ background-color: #6a0080;
+ }
+ li{
+ float: left;
+ }
+ li a{
+ color: #ffffff;
+ display: block;
+ text-align: center;
+ padding: 15px 15px;
+ text-decoration: none;
+ }
+ .active{
+ background-color: #78002e;
+ }
     </style>
 </head>
 <body>
@@ -64,7 +75,6 @@ div.settings  label:after { content: ":"; }
             <fx-setvalue ref="instance()/@user" value="event('user')"/>
             <fx-update/>
             <fx-send submission="s-load-names"/>
-            <fx-send submission="s-schedule-names"/>
         </fx-action>
 
         <!-- listening on document for an 'logged-out' event, output a message and reset username -->
@@ -106,12 +116,12 @@ div.settings  label:after { content: ":"; }
                 </data>
             </fx-instance>
             
-            <fx-instance id="i-provider-list">
+            <fx-instance id="i-providers">
                 <data>
                 </data>
             </fx-instance>
             
-            <fx-instance id="i-schedule-list">
+            <fx-instance id="i-schedules">
                 <data>
                 </data>
             </fx-instance>            
@@ -121,6 +131,32 @@ div.settings  label:after { content: ":"; }
                 </data>
             </fx-instance>
 
+            <fx-instance id="i-services">
+                <data>
+                </data>
+            </fx-instance>
+
+            <fx-instance id="i-servicetypes">
+                <data>
+                </data>
+            </fx-instance>
+
+            <fx-instance id="i-specialties">
+                <data>
+                    <code value="arzt" label="Arzt"/>
+                    <code value="psych" label="Psych"/>
+                    <code value="team" label="Team"/>
+                </data>
+            </fx-instance>
+
+            <fx-instance id="i-orgs">
+                <data>
+                    <Organization xmlns="http://hl7.org/fhir">
+                        <id value="ukk-kikl"/>
+                        <name value="UKK KiKl"/>
+                    </Organization>
+                </data>
+            </fx-instance>
           <!--
           <fx-bind ref=".//byDay/@value" constraint="local:days-validjs(.,/../../freq/@value)">
               <fx-alert>
@@ -156,12 +192,12 @@ div.settings  label:after { content: ":"; }
             
             <!-- submissions send http requests. This one loads all ical owners with a GET request and
             replace our ical-list instance with the response data. -->
-            <fx-submission id="s-load-names" url="http://localhost:8080/exist/apps/nonfhir/ICal?_elements=id,actor&amp;active=true" method="get" replace="instance" instance="i-provider-list" validate="false">
+            <fx-submission id="s-load-names" url="http://localhost:8080/exist/apps/nonfhir/ICal?_elements=id,actor&amp;active=true" method="get" replace="instance" instance="i-providers" validate="false">
                 <fx-header name="Accept">application/xml</fx-header>
                 <fx-message event="submit-error">could not load ical owners</fx-message>
                 <fx-message event="submit-done">ical owners loaded</fx-message>
             </fx-submission>
-             <fx-submission id="s-schedule-names" url="http://localhost:8080/exist/apps/nonfhir/ICal?_elements=id,type,name,ff&amp;active=true&amp;type={instance('default')/schedule-type}" method="get" replace="instance" instance="i-schedule-list" mediatype="application/fhir+xml">
+             <fx-submission id="s-schedule-names" url="http://localhost:8080/exist/apps/nonfhir/ICal?_elements=id,type,name,ff&amp;active=true&amp;type={instance('default')/schedule-type}" method="get" replace="instance" instance="i-schedules" mediatype="application/fhir+xml">
                 <fx-header name="Accept">application/xml</fx-header>
                 <fx-message event="submit-error">could not load schedules</fx-message>
                 <fx-message event="submit-done">schedules loaded</fx-message>
@@ -186,13 +222,13 @@ div.settings  label:after { content: ":"; }
                     <dirty>false</dirty>
                     <save-trigger/>
 <!--
-                    <has-schedule/>
-                    <has-agenda/>
-                    <has-event/>
-                    <no-schedule/>
-                    <no-agenda/>
-                    <no-event/>  
-                    <has-rdate/>
+                    <has-schedule></has-schedule>
+                    <has-agenda></has-agenda>
+                    <has-event></has-event>
+                    <no-schedule></no-schedule>
+                    <no-agenda></no-agenda>
+                    <no-event></no-event>
+                    <has-rdate></has-rdate>
 -->
                 </data>
             </fx-instance>
@@ -237,25 +273,25 @@ div.settings  label:after { content: ":"; }
         <nav> 
             <ul> 
                 <li>
-                            <a class="active" href="#">eNahar Admin</a>
-                        </li> 
+                    <a class="active" href="#">eNahar Admin</a>
+                </li> 
                 <li>
-                            <a href="#">Menu</a>
-                        </li> 
+                    <a href="#">Menu</a>
+                </li> 
                 <li>
-                            <a href="#">About us</a>
-                        </li> 
+                    <a href="#">About us</a>
+                </li> 
                 <li>
-                            <a href="#">Contact us</a>
-                        </li>
+                    <a href="#">Contact us</a>
+                </li>
                 <li>
                 </li>
             </ul> 
         </nav> 
         <!-- a nested Fore element is used and loaded from login.html. The containing fx-fore element from that page
         is extracted and replaces the original element in the DOM. The login page contains the complete logic and
-        UI for a form-based login into eXist-db. 
-        <fx-fore id="login" src="login.html"/>
+        UI for a form-based login into eXist-db.
+        <fx-fore id="login" src="login.html"></fx-fore>
 -->
 
         <!-- template expressions can occur on nearly any attribute but are most valuable to switch CSS classes.
@@ -271,9 +307,8 @@ div.settings  label:after { content: ":"; }
                         </p>
             </div>
 
-            <div class="gridh">
-            
-              <div class="wrapit">
+            <fieldset>
+                <legend>Search</legend>
                 <fx-control id="proflist" ref="./profession" update-event="change">
                     <label>Service</label>
                     <select ref="instance('default')/professions/option" class="widget" selection="open">
@@ -282,11 +317,9 @@ div.settings  label:after { content: ":"; }
                         </template>
                     </select>
                 </fx-control>
-              </div>
-              <div class="wrapit">
                 <fx-control id="provider" ref="./selected" update-event="change">
                     <label>Erbringer</label>
-                    <select ref="instance('i-provider-list')//*:ICal" class="widget" selection="open">
+                    <select ref="instance('i-providers')//*:ICal" class="widget" selection="open">
                         <template>
                             <option value="{./*:id/@value}">{./fhir:actor/fhir:display/@value}</option>
                         </template>
@@ -295,25 +328,18 @@ div.settings  label:after { content: ":"; }
                     <!-- refresh itself if proflist changes -->
                     <fx-refresh event="value-changed" target="proflist" self="self"/>
                 </fx-control>
-              </div>
-              <div class="wrapit">
                 <fx-control ref="./show-all-agendas" update-event="input" value-prop="checked">
-                      <div style="float:left;margin-right:20px;">
                         <label class="" for="check1">All active iCals?</label>
                         <input id="check1" class="widget" type="checkbox"/>
-                      </div>
                         <fx-send event="value-changed" submission="s-load-names"/>
                 </fx-control>
-              </div>
-              <div class="wrapit">
                 <fx-trigger ref="instance('i-control')/save-trigger">
                     <button>Save ical</button>
                     <fx-action>
                         <fx-send submission="s-save"/>
                     </fx-action>
                 </fx-trigger>
-              </div>
-            </div>
+             </fieldset>
         </section>
         <section class="{if(string-length(instance()/@user) != 0) then 'loggedIn' else 'hidden'}">
         <details>
@@ -325,63 +351,166 @@ div.settings  label:after { content: ":"; }
                 <fx-message>value-changed</fx-message>
                 <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
             </fx-action>
-            <fieldset>
+            <details>
+                <summary>debug only</summary>
+                <fieldset>
                 <legend>LastUpdated</legend>
-                <fx-output ref="./fhir:meta/fhir:extension/fhir:valueReference/fhir:display/@value"/>
-                <fx-output ref="./fhir:meta/fhir:lastUpdated/@value"/>
-            </fieldset>
-            <fieldset>
+                <fx-output ref="./fhir:meta/fhir:extension/fhir:valueReference/fhir:display/@value">
+                    <label slot="label">Erbringer</label>
+                </fx-output>
+                <fx-output ref="./fhir:meta/fhir:lastUpdated/@value">
+                    <label slot="label">Date</label>
+                </fx-output>
+                </fieldset>
+                <fieldset>
                 <legend>Invariants</legend>
-                <fx-output ref="./fhir:actor/fhir:display/@value"/>
-                <fx-output ref="./fhir:cutype//fhir:code/@value"/>
-                <fx-output ref="./fhir:caltype//fhir:code/@value"/>
-            </fieldset>
+                <fx-output ref="./fhir:actor/fhir:display/@value">
+                    <label slot="label">Owner</label>
+                </fx-output>
+                <fx-output ref="./fhir:cutype//fhir:code/@value">
+                    <label slot="label">CUType</label>
+                </fx-output>
+                <fx-output ref="./fhir:caltype//fhir:code/@value">
+                    <label slot="label">CalType</label>
+                </fx-output>
+                </fieldset>
+            </details>
             <fieldset>
                 <fx-control ref="./fhir:active/@value" update-event="input" value-prop="checked">
                     <label>active?</label>
                     <input id="active" type="checkbox"/>
                 </fx-control>
-
-                <label>ServiceCategory+</label>
+                <fieldset>
+                <legend>
+                                        <label>ServiceCategory</label>
+                    <fx-trigger class="add" title="ServiceCategory hinzufügen">
+                        <iron-icon class="add-icon-outline" title="ServiceCategory hinzufügen"/>
+                        <!--
+                        <fx-insert/>
+                        <fx-refresh/>
+                        -->
+                    </fx-trigger>
+                </legend>
                 <fx-repeat ref="./fhir:serviceCategory">
                     <template>
+                    <div>
                         <fx-control ref=".//fhir:code/@value">
+                    <select ref="instance('i-services')//*:ICal" class="widget" selection="open">
+                        <template>
+                            <option value="{./*:id/@value}">{./fhir:actor/fhir:display/@value}</option>
+                        </template>
+                    </select>
                         </fx-control>
+                    </div>
+                    <fx-trigger class="add" title="ServiceCategory löschen">
+                        <iron-icon class="remove-icon-outline" title="ServiceCategory löschen"/>
+                        <!--
+                        <fx-delete>.</fx-delete>
+                        <fx-refresh/>
+                        -->
+                    </fx-trigger>
                     </template>
                 </fx-repeat>
-
-                <label>ServiceType+</label>
-
+                </fieldset>
+                <fieldset>
+                <legend>
+                    <label>ServiceType</label>
+                 <fx-trigger class="add" title="ServiceCategory hinzufügen">
+                        <iron-icon icon="add-icon-outline" title="ServiceType hinzufügen"/>
+                        <!--
+                        <fx-insert/>
+                        <fx-refresh/>
+                        -->
+                    </fx-trigger>
+                </legend>
                 <fx-repeat ref="./fhir:serviceType">
                     <template>
+                    <div>
                         <fx-control ref=".//fhir:display/@value">
+                            <select ref="instance('i-servicetypes')//*:ICal" class="widget" selection="open">
+                                <template>
+                                    <option value="{./*:id/@value}">{./fhir:actor/fhir:display/@value}</option>
+                                </template>
+                            </select>
                         </fx-control>
+                    <fx-trigger class="add" title="ServiceCategory löschen">
+                        <iron-icon icon="remove-icon-outline" title="ServiceType löschen"/>
+                        <!--
+                        <fx-delete>.</fx-delete>
+                        <fx-refresh/>
+                        -->
+                    </fx-trigger>
+                    </div>
                     </template>
                 </fx-repeat>
-
-                <label>Specialty+</label>
-
+                </fieldset>
+                <fieldset>
+                    <legend>
+                                        <label>Specialty</label>
+                 <fx-trigger class="add" title="ServiceCategory hinzufügen">
+                        <iron-icon icon="add-icon-outline" title="Specialty hinzufügen"/>
+                        <!--
+                        <fx-insert/>
+                        <fx-refresh/>
+                        -->
+                    </fx-trigger>
+                </legend>
                 <fx-repeat ref="./fhir:specialty">
                     <template>
+                    <div>
                         <fx-control ref=".//fhir:code/@value">
+                            <select ref="instance('i-specialties')//*:code" class="widget" selection="open">
+                                <template>
+                                    <option value="{./@value}">{./@label}</option>
+                                </template>
+                            </select>
                         </fx-control>
+                    </div>
+                    <fx-trigger class="add" title="ServiceCategory löschen">
+                        <iron-icon icon="remove-icon-outline" title="Specialty löschen"/>
+                        <!--
+                        <fx-delete>.</fx-delete>
+                        <fx-refresh/>
+                        -->
+                    </fx-trigger>
                     </template>
                 </fx-repeat>
-
-
-
+                </fieldset>
                 <fx-control ref="./fhir:name/@value">
                     <label>Name</label>
+                 <fx-trigger class="add" title="Organization hinzufügen">
+                        <iron-icon icon="add-icon-outline" title="Organization hinzufügen"/>
+                        <!--
+                        <fx-insert/>
+                        <fx-refresh/>
+                        -->
+                    </fx-trigger>
                 </fx-control>
-
-                <label>Organization*</label>
+                <fieldset>
+                <legend>
+                                        <label>Organization</label>
+                </legend>
                 <fx-repeat ref="./fhir:organization">
                     <template>
+                    <div>
                         <fx-control ref="./fhir:display/@value">
+                            <select ref="instance('i-orgs')//fhir:Organization" class="widget" selection="open">
+                                <template>
+                                    <option value="Organization/{./*:id/@value}">{./fhir:name/@value}</option>
+                                </template>
+                            </select>
                         </fx-control>
+                    </div>
+                    <fx-trigger class="add" title="Organization löschen">
+                        <iron-icon icon="remove-icon-outline" title="Organization löschen"/>
+                        <!--
+                        <fx-delete>.</fx-delete>
+                        <fx-refresh/>
+                        -->
+                    </fx-trigger>
                     </template>
                 </fx-repeat>
-
+                </fieldset>
                 <fx-control ref="./fhir:comment/@value">
                     <label>Comment</label>
                 </fx-control>
@@ -392,47 +521,41 @@ div.settings  label:after { content: ":"; }
           <summary>
             <strong>{if (instance('i-cal')[./fhir:schedule]) then '' else 'No '}Schedules</strong>
           </summary>
-          <fx-group ref="instance('default')" id="sched-select" class="settings">
-            <span>
-                <strong>{instance('i-cal')/fhir:schedule[index('r-sched')]/fhir:basedOn/fhir:display/@value}</strong>
-            </span>
-            <fx-control ref="./schedule-type" update-event="change">
-                <label>Schedule types</label>
-                <select ref="./schedule-types/option" class="widget">
-                    <template>
-                    <option value="{@value}">{.}</option>
-                    </template>
-                </select>                        
-                <fx-action event="value-changed">                               
+          <fieldset>
+          <legend>
+                                <label>Schedules</label>
+            <fx-trigger ref="instance('i-cal')[./fhir:schedule]">
+                    <button>Neu</button>                                                                                                 
+                    <fx-action>         
+                    <!-- insert correct template for schedule type
+                       <fx-insert position="before" at="1" ref="./schedule" context="instance('i-cal')" origin="instance('i-ical-infos')/bricks/schedule"/>
+                    -->
+                       <fx-show dialog="d-schedule-type"/>
+                    </fx-action>
+            </fx-trigger>
+            <fx-dialog id="d-schedule-type">
+                <fx-setfocus control="schedule-type" event="dialog-shown" delay="500"/>
+                <div class="dialog-content">
+                <header>Schedule Type</header>
+                    <fx-control id="schedule-type" ref="instance('i-cal')/fhir:schedule/fhir:type/@value" update-event="change">
+                        <label>Type</label>
+                        <select class="widget" name="user" ref="instance('default')/schedule-types/option">
+                            <template>
+                                <option value="{./@value}">{.}</option>
+                            </template>
+                        </select>
+                    </fx-control>
+                <fx-trigger class="action">
+                    <button>Schließen</button>
+                    <fx-hide dialog="d-schedule-type"/>
+                    
                     <fx-message>Schedule type changed</fx-message>              
                     <fx-send submission="s-schedule-names"/>                    
-                </fx-action>                                                    
-            </fx-control>
-<!--
-                    <fx-control id="all-scheds" ref="./schedule-ref" update-event="change">
-                        <label>Select Schedule</label>
-                        <select ref="instance('i-schedule-list')//fhir:ICal" class="widget" selection="open"> 
-                            <template>                                                                       
-                                <option value="{./*:id/@value}">{./fhir:name/@value}</option>                       
-                            </template>                                                                      
-                        </select>                                                       
-                        <fx-action event="value-changed">                               
-                            <fx-message>Schedule selected</fx-message>                  
-                            <fx-setvalue ref="instance('i-cal')/schedule[index('r-sched')]/global/reference/@value">{concat('enahar/schedules/',instance('i-schedule-list')//Schedule[id/@value=instance('default')/schedule-ref]/name/@value)}</fx-setvalue>
-                            <fx-setvalue ref="instance('i-cal')/schedule[index('r-sched')]/global/display/@value">{instance('i-schedule-list')//Schedule[id/@value=instance('default')/schedule-ref]/name/@value}</fx-setvalue>
-                            <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
-                        </fx-action>
-                    </fx-control>     
--->
-                <fx-trigger ref="instance('i-cal')[./fhir:schedule]">
-                    <button>Neu</button>                                                                                                 
-                    <fx-action>                                                         
-                       <fx-insert position="before" at="1" ref="./schedule" context="instance('i-cal')" origin="instance('i-ical-infos')/bricks/schedule"/>
-                    </fx-action>
-                </fx-trigger>                                                                                                             
-          </fx-group>
-        </details>
-        <fx-repeat id="r-sched" ref="instance('i-cal')/fhir:schedule" style="display: grid; grid-template-rows: repeat({count(instance('i-cal')/schedule)},1fr);">
+                </fx-trigger>
+            </div>
+        </fx-dialog>
+           </legend>
+        <fx-repeat id="r-sched" ref="instance('i-cal')/fhir:schedule">
 <!--
             <fx-action event="item-changed" target="r-sched">
                 <fx-message>schedule: item-changed; 1 index: {event('index')}</fx-message>
@@ -444,9 +567,24 @@ div.settings  label:after { content: ":"; }
                 <fx-message>s: value-changed</fx-message>
                 <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
             </fx-action>
-                    <div class="settings">
-                    <h4>{./fhir:basedOn/fhir:display/@value}</h4>
-                    <fx-output ref="./fhir:type/@value"/>
+                    <fieldset>
+                    <legend>{./fhir:basedOn/fhir:display/@value}</legend>
+<!--
+                    <fx-control id="all-scheds" ref="./schedule-ref" update-event="change">
+                        <label>Select Schedule</label>
+                        <select ref="instance('i-schedules')//fhir:ICal" class="widget" selection="open"> 
+                            <template>                                                                       
+                                <option value="{./*:id/@value}">{./fhir:name/@value}</option>                       
+                            </template>                                                                      
+                        </select>                                                       
+                        <fx-action event="value-changed">                               
+                            <fx-message>Schedule selected</fx-message>                  
+                            <fx-setvalue ref="instance('i-cal')/schedule[index('r-sched')]/global/reference/@value">{concat('enahar/schedules/',instance('i-schedules')//Schedule[id/@value=instance('default')/schedule-ref]/name/@value)}</fx-setvalue>
+                            <fx-setvalue ref="instance('i-cal')/schedule[index('r-sched')]/global/display/@value">{instance('i-schedules')//Schedule[id/@value=instance('default')/schedule-ref]/name/@value}</fx-setvalue>
+                            <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
+                        </fx-action>
+                    </fx-control>     
+-->
                     <fx-output ref="./fhir:realm/fhir:display/@value"/>
                     <fx-group> <!-- if type=service -->
                         <fx-control id="special" ref="./fhir:isSpecial/@value">
@@ -466,8 +604,7 @@ div.settings  label:after { content: ":"; }
                             </fx-action>
                         </fx-control>
                     </fx-group>
-                        <div class="settings">
-                		    <div>
+                        <div>
                 		        <fx-control ref="./fhir:period/fhir:start/@value" update-event="input">
                                     <label for="a-start">Von</label>
             			            <input id="a-start" class="widget" type="date"/>
@@ -499,14 +636,23 @@ div.settings  label:after { content: ":"; }
                                     <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
                                 </fx-trigger>
                             </div>
-            	    	</div>
             	    	<fx-output ref="./fhir:timezone/@value"/>
                         <fx-output ref="./fhir:venue//fhir:priority/@value"/>
                         <fx-output ref="./fhir:venue//fhir:display/@value"/>
                         <fx-output ref="./fhir:note/fhir:text/@value"/>
                         <div>rendering</div>
                         <div>timing</div>
-                    </div>
+                    </fieldset>
+                    <fieldset>
+                    <legend>
+                                                <label>Agendas</label>
+                        <fx-trigger ref="instance('i-cal')[./fhir:schedule]">
+                            <button>Neu</button>                                                                                                 
+                            <fx-action>                                                         
+                               <fx-insert position="before" at="1" ref="./schedule" context="instance('i-cal')" origin="instance('i-ical-infos')/bricks/schedule"/>
+                            </fx-action>
+                        </fx-trigger>
+                    </legend>
                     <fx-repeat id="r-agenda" ref="./fhir:schedule">
 <!--
                         <fx-action event="item-changed">
@@ -514,7 +660,7 @@ div.settings  label:after { content: ":"; }
                         </fx-action>
 -->
                         <template>
-
+                        <div>
                         <details>
                         <summary style="{if (exists(./fhir:period/fhir:end) and ./fhir:period/fhir:end/@value &lt; instance('default')/today) then 'background-color: rgba(180, 180, 70, 0.8); transform:skewX(-20deg)' else ''}">{if (./fhir:period/fhir:start) then substring(./fhir:period/fhir:start/@value,1,10) else '∞'} -&gt; {if (./fhir:period/fhir:end) then substring(./fhir:period/fhir:end/@value,1,10) else '∞'}
                             <fx-trigger class="iconbtn del">
@@ -525,9 +671,10 @@ div.settings  label:after { content: ":"; }
                                 </fx-action>
                             </fx-trigger>
                         </summary>
-                        <div class="agenda">
-                            <fx-output ref="./fhir:type/@value"/>
-                            <div class="settings">
+                        <fieldset class="agenda">
+                            <legend>
+                                                                    <fx-output ref="./fhir:type/@value"/>
+                                                                </legend>
                 		    <div>
                 		        <fx-control ref="./fhir:period/fhir:start/@value" update-event="input">
                                     <label for="a-start">Von</label>
@@ -566,12 +713,13 @@ div.settings  label:after { content: ":"; }
                             <fx-output ref="./fhir:note/fhir:text/@value"/>
                             <div>rendering</div>
                             <div>timing</div>
-                            </div>
+                            </fieldset>
 
                         <fx-repeat id="r-event" class="event" ref="./fhir:event">
                             <fx-action event="event: item-changed">
                             </fx-action>
                             <template>
+                            <div>
                             <details>
                             <summary>{./fhir:name/@value}</summary>
                             <div class="event settings">
@@ -725,15 +873,26 @@ div.settings  label:after { content: ":"; }
     </details>
 -->
                         </details>
+                        </div>
                         </template>
                         </fx-repeat>
-                    </div>
                     </details>
+                    </div>
                     </template>
                     </fx-repeat>
+                    </fieldset>
                 </div>
+                <fx-trigger class="add" title="Organization löschen">
+                    <iron-icon class="remove-icon-outline" title="Organization löschen"/>
+                    <!--
+                    <fx-delete>.</fx-delete>
+                    <fx-refresh/>
+                    -->
+                </fx-trigger>
             </template>
         </fx-repeat>
+        </fieldset>
+        </details>
         </section>
     </fx-fore>
 </div>

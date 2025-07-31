@@ -1,0 +1,37 @@
+<fx-repeat id="parts" ref=".//msPart">
+                            <template>
+                                <fx-trigger class="delete {if(@type='main' or count(./preceding-sibling::msPart) = 0) then 'hidden' else ''} remove-fragment">
+                                    <iron-icon icon="remove-circle-outline"/>
+<!--
+                                    <pb-popover>
+                                        <iron-icon icon="remove-circle-outline"></iron-icon>
+                                        <template slot="alternate"><pb-i18n key="form.hint-delete-fragment"></pb-i18n></template>
+                                    </pb-popover>
+-->
+                                    <fx-confirm message="really delete this fragment?">
+                                        <fx-delete ref="."/>
+                                    </fx-confirm>
+                                    <fx-refresh control="parts"/>
+                                </fx-trigger>
+
+                                <div class="fragment" id="{@xml:id}">
+                                    <label>
+                                        <pb-popover>
+                                            <fx-switch ref="@type">
+                                                <fx-case name="main">
+                                                    <pb-i18n key="form.part-main"/>
+                                                    <iron-icon icon="info-outline"/>
+                                                </fx-case>
+                                                <fx-case name="fragment">
+                                                    <pb-i18n key="form.part-fragment"/>
+                                                    <iron-icon icon="info-outline"/>
+                                                </fx-case>
+                                            </fx-switch>
+                                            <template slot="alternate">
+                                                <pb-i18n key="form.hint-part-type"/>
+                                            </template>
+                                        </pb-popover>
+                                    </label>
+                                </div>
+                            </template>
+            </fx-repeat>

@@ -17,10 +17,10 @@
 
             <fx-instance>
                 <data>
-                    <user/>
-                    <password/>
-                    <login/>
-                    <logout/>
+                    <user></user>
+                    <password></password>
+                    <login></login>
+                    <logout></logout>
                 </data>
             </fx-instance>
 
@@ -51,8 +51,8 @@
                     <fx-dispatch name="logged-out">                        
                         <fx-property name="user" expr="string(instance()/user)"/>
                     </fx-dispatch>
-                    <fx-setvalue ref="user"/>
-                    <fx-setvalue ref="logout"/>
+                    <fx-setvalue ref="user"></fx-setvalue>
+                    <fx-setvalue ref="logout"></fx-setvalue>
                     <fx-refresh force="force"/>
                     <fx-message>done</fx-message>
                 </fx-action>
