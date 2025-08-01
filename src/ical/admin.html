@@ -74,7 +74,7 @@ li a:hover:not(.active){
         <fx-action event="model-construct-done" target="#document">
             <fx-setvalue ref="instance()/@user" value="event('user')"/>
             <fx-update/>
-            <fx-send submission="s-load-names"/>
+            <fx-send submission="s-ical-names"/>
         </fx-action>
 
         <!-- listening on document for an 'logged-out' event, output a message and reset username -->
@@ -89,6 +89,12 @@ li a:hover:not(.active){
 
             <fx-instance id="default">
                 <data user="admin">
+                    <cutype>individual</cutype>
+                    <cutypes>
+                        <option value="individual">Individual</option>
+                        <option value="group">Group</option>
+                        <option value="template">Template</option>
+                    </cutypes>
                     <selected/>
                     <profession>arzt</profession>
                     <professions>
@@ -109,7 +115,7 @@ li a:hover:not(.active){
                     </schedule-types>
                     <schedule-ref/>
                     <show-all-agendas>false</show-all-agendas>
-                    <show-all-cals>false</show-all-cals>
+                    <show-all-icals>false</show-all-icals>
                     <isspecial>false</isspecial>
                     <today>2025-07-28</today>
                     <is-old>0</is-old>
@@ -192,10 +198,10 @@ li a:hover:not(.active){
             
             <!-- submissions send http requests. This one loads all ical owners with a GET request and
             replace our ical-list instance with the response data. -->
-            <fx-submission id="s-load-names" url="http://localhost:8080/exist/apps/nonfhir/ICal?_elements=id,actor&amp;active=true" method="get" replace="instance" instance="i-providers" validate="false">
+            <fx-submission id="s-ical-names" url="http://localhost:8080/exist/apps/nonfhir/ICal?_elements=id,actor,name&amp;cutype={instance('default')/cutype}&amp;active=true" method="get" replace="instance" instance="i-providers" validate="false">
                 <fx-header name="Accept">application/xml</fx-header>
-                <fx-message event="submit-error">could not load ical owners</fx-message>
-                <fx-message event="submit-done">ical owners loaded</fx-message>
+                <fx-message event="submit-error">could not load ical names</fx-message>
+                <fx-message event="submit-done">ical names loaded</fx-message>
             </fx-submission>
              <fx-submission id="s-schedule-names" url="http://localhost:8080/exist/apps/nonfhir/ICal?_elements=id,type,name,ff&amp;active=true&amp;type={instance('default')/schedule-type}" method="get" replace="instance" instance="i-schedules" mediatype="application/fhir+xml">
                 <fx-header name="Accept">application/xml</fx-header>
@@ -236,7 +242,7 @@ li a:hover:not(.active){
             <fx-bind ref="instance('i-control')">
 
                 <fx-bind ref="./show-all-agendas" type="xs:boolean"/>
-
+                
                 <fx-bind ref="./save-trigger" relevant="boolean-from-string(instance('i-control')/dirty)"/>
 <!--
                 <fx-bind ref="./has-schedule" relevant="exists(instance('i-cal')//*:schedule)"/>
@@ -309,36 +315,111 @@ li a:hover:not(.active){
 
             <fieldset>
                 <legend>Search</legend>
-                <fx-control id="proflist" ref="./profession" update-event="change">
+                <fx-control id="cutype" ref="./cutype" update-event="change">
+                    <label>Service</label>
+                    <select ref="instance('default')/cutypes/option" class="widget">
+                        <template>
+                            <option value="{@value}">{.}</option>
+                        </template>
+                    </select>
+                    <fx-send event="value-changed" submission="s-ical-names"/>
+                </fx-control>
+                <fx-group ref="./cutype[.='individual']">
+                <fx-control id="proflist" ref="instance('default')/profession" update-event="change">
                     <label>Service</label>
                     <select ref="instance('default')/professions/option" class="widget" selection="open">
                         <template>
                             <option value="{@value}">{.}</option>
                         </template>
                     </select>
+                    <fx-send event="value-changed" submission="s-ical-names"/>
                 </fx-control>
-                <fx-control id="provider" ref="./selected" update-event="change">
-                    <label>Erbringer</label>
+                </fx-group>
+                <fx-control id="provider" ref="instance('default')/selected" update-event="change">
+                    <label>iCal Name</label>
                     <select ref="instance('i-providers')//*:ICal" class="widget" selection="open">
                         <template>
-                            <option value="{./*:id/@value}">{./fhir:actor/fhir:display/@value}</option>
+                            <option value="{./*:id/@value}">{./fhir:name/@value}</option>
                         </template>
                     </select>
                     <fx-send event="value-changed" submission="s-read-ical"/>
-                    <!-- refresh itself if proflist changes -->
+                    <!-- refresh itself if cutype or proflist changes -->
+                    <fx-refresh event="value-changed" target="cutype" self="self"/>
                     <fx-refresh event="value-changed" target="proflist" self="self"/>
                 </fx-control>
-                <fx-control ref="./show-all-agendas" update-event="input" value-prop="checked">
-                        <label class="" for="check1">All active iCals?</label>
+                <fx-control ref="./show-all-icals" update-event="input" value-prop="checked">
+                        <label class="" for="check1">All iCals?</label>
                         <input id="check1" class="widget" type="checkbox"/>
-                        <fx-send event="value-changed" submission="s-load-names"/>
+                        <fx-send event="value-changed" submission="s-ical-names"/>
                 </fx-control>
+                <fx-trigger>
+                    <button>New</button>
+                    <fx-action>
+                        <fx-insert ref="./fhir:ICal" context="instance('i-cal')" origin="instance('i-ical-infos')//*:ICal[fhir:cutype//fhir:code/@value='empty']"/>
+                        <fx-show dialog="d-new-ical"/>
+                    </fx-action>
+                </fx-trigger>
                 <fx-trigger ref="instance('i-control')/save-trigger">
-                    <button>Save ical</button>
+                    <button>Save</button>
                     <fx-action>
                         <fx-send submission="s-save"/>
                     </fx-action>
                 </fx-trigger>
+                <fx-dialog id="d-new-ical">
+                    <fx-setfocus control="ical-cutype" event="dialog-shown" delay="500"/>
+                    <div class="dialog-content">
+                    <header>New ICal</header>
+                    <fx-control id="ical-id" ref="instance('i-cal')//fhir:identifier/fhir:value/@value">
+                        <label>ID</label>
+                    </fx-control>
+                    <fx-control id="ical-cutype" ref="instance('i-cal')//fhir:cutype/fhir:coding/fhir:code/@value" update-event="change">
+                        <label>Type</label>
+                        <select class="widget" name="cutype" ref="instance('default')/cutypes/option">
+                            <template>
+                                <option value="{./@value}">{.}</option>
+                            </template>
+                            <fx-action event="value-changed">
+                            <!--
+                            <fx-setvalue ...
+                            <fx-insert actor
+                            -->
+                            </fx-action>
+                        </select>
+                    </fx-control>
+                    <fx-control id="ical-caltype" ref="instance('i-cal')//fhir:caltype/fhir:coding/fhir:code/@value" update-event="change">
+                        <label>Type</label>
+                        <select class="widget" name="caltype" ref="instance('default')/cutypes/option">
+                            <template>
+                                <option value="{./@value}">{.}</option>
+                            </template>
+                            <fx-action event="value-changed">
+                            <!--
+                            <fx-setvalue ...
+                            -->
+                            </fx-action>
+                        </select>
+                    </fx-control>
+                    <fx-control id="ical-caltype" ref="instance('i-cal')/fhir:ICal/fhir:actor/fhir:reference/@value" update-event="change">
+                        <label>Owner</label>
+                        <select class="widget" name="user" ref="instance('default')/cutypes/option">
+                            <template>
+                                <option value="{./@value}">{.}</option>
+                            </template>
+                            <fx-action event="value-changed">
+                            <!--
+                            <fx-setvalue ...
+                            -->
+                            </fx-action>
+                        </select>
+                    </fx-control>
+                <fx-trigger class="action">
+                    <button>Schließen</button>
+                    <fx-hide dialog="d-new-ical"/>
+                    
+                    <fx-message>New Ical initialzed</fx-message>              
+                </fx-trigger>
+            </div>
+            </fx-dialog>
              </fieldset>
         </section>
         <section class="{if(string-length(instance()/@user) != 0) then 'loggedIn' else 'hidden'}">
@@ -352,7 +433,7 @@ li a:hover:not(.active){
                 <fx-setvalue ref="instance('i-control')/dirty">true</fx-setvalue>
             </fx-action>
             <details>
-                <summary>debug only</summary>
+                <summary>Info only</summary>
                 <fieldset>
                 <legend>LastUpdated</legend>
                 <fx-output ref="./fhir:meta/fhir:extension/fhir:valueReference/fhir:display/@value">
@@ -364,14 +445,14 @@ li a:hover:not(.active){
                 </fieldset>
                 <fieldset>
                 <legend>Invariants</legend>
-                <fx-output ref="./fhir:actor/fhir:display/@value">
-                    <label slot="label">Owner</label>
-                </fx-output>
                 <fx-output ref="./fhir:cutype//fhir:code/@value">
                     <label slot="label">CUType</label>
                 </fx-output>
                 <fx-output ref="./fhir:caltype//fhir:code/@value">
                     <label slot="label">CalType</label>
+                </fx-output>
+                <fx-output ref="./fhir:actor/fhir:display/@value">
+                    <label slot="label">Owner</label>
                 </fx-output>
                 </fieldset>
             </details>
@@ -530,10 +611,10 @@ li a:hover:not(.active){
                     <!-- insert correct template for schedule type
                        <fx-insert position="before" at="1" ref="./schedule" context="instance('i-cal')" origin="instance('i-ical-infos')/bricks/schedule"/>
                     -->
-                       <fx-show dialog="d-schedule-type"/>
+                       <fx-show dialog="d-new-schedule"/>
                     </fx-action>
             </fx-trigger>
-            <fx-dialog id="d-schedule-type">
+            <fx-dialog id="d-new-schedule">
                 <fx-setfocus control="schedule-type" event="dialog-shown" delay="500"/>
                 <div class="dialog-content">
                 <header>Schedule Type</header>
@@ -547,13 +628,13 @@ li a:hover:not(.active){
                     </fx-control>
                 <fx-trigger class="action">
                     <button>Schließen</button>
-                    <fx-hide dialog="d-schedule-type"/>
+                    <fx-hide dialog="d-new-schedule"/>
                     
                     <fx-message>Schedule type changed</fx-message>              
                     <fx-send submission="s-schedule-names"/>                    
                 </fx-trigger>
             </div>
-        </fx-dialog>
+            </fx-dialog>
            </legend>
         <fx-repeat id="r-sched" ref="instance('i-cal')/fhir:schedule">
 <!--
