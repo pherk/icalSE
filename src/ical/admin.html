@@ -8,58 +8,25 @@
     <link rel="stylesheet" href="../resources/css/fore.css" media="screen"/>
     <link rel="stylesheet" href="../resources/css/edep-theme.css"/>
     <link rel="stylesheet" href="../resources/css/edep-theme2.css"/>
+    <script type="module" src="../resources/scripts/jinn-codemirror-bundle.js"/>
+<!--    <script type="module" src="http://localhost:8090/index.js"></script>-->
+    <script type="module" src="../resources/scripts/fore-dev.js"/>
     <script type="module">
         import '@polymer/iron-iconset-svg/iron-iconset-svg.js';
         import '@polymer/iron-icon/iron-icon.js';
     </script>
-    <script type="module" src="../resources/scripts/jinn-codemirror-bundle.js"/>
-<!--    <script type="module" src="http://localhost:8090/index.js"></script>-->
-    <script type="module" src="../resources/scripts/fore-dev.js"/>
     <style>
-        .iconbtn{
-            grid-area: icon;
-        }
-        .iconbtn{
-            position: relative;
-            right: 0rem;
-        }
-        .iconbtn button:hover{
-            background: red;
-            color: white;
-        }
-        .del{
-            float: right;
-        }
-        .iconbtn button{
-            border-radius: 50%;
-            border:none;
-            color:black;
-            background: white;
-        }
 
-ul{
- background-color: #ff4081;
- margin: 0px;
- padding: 0px;
- overflow: hidden;
- list-style-type: none;
- } 
-li a:hover:not(.active){
- background-color: #6a0080;
- }
- li{
- float: left;
- }
- li a{
- color: #ffffff;
- display: block;
- text-align: center;
- padding: 15px 15px;
- text-decoration: none;
- }
- .active{
- background-color: #78002e;
- }
+ul {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #f0c764;
+}
+li {
+    display: inline;
+}
+
     </style>
 </head>
 <body>
@@ -274,12 +241,16 @@ li a:hover:not(.active){
               }
               return r;
             </fx-function>
-            
+            <fx-function signature="gen-id() as xs:string" type="text/javascript">
+                return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =&gt;
+                        (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] &amp; 15 &gt;&gt; +c / 4).toString(16)
+                    );
+            </fx-function>
         </fx-model>
-        <nav> 
-            <ul> 
+        <nav class="">
+            <ul>
                 <li>
-                    <a class="active" href="#">eNahar Admin</a>
+                    <a class="active" href="#">ICal Admin</a>
                 </li> 
                 <li>
                     <a href="#">Menu</a>
@@ -305,14 +276,6 @@ li a:hover:not(.active){
         or 'hidden'.
         When a user is not logged in the class will be 'hidden' and the whole section is invisible to the user -->
         <section class="{if(string-length(instance()/@user) != 0) then 'loggedIn' else 'hidden'}">
-            <div class="info">
-                <!-- template expressions can used builtin and custom functions and access pathes in your
-                instance data with the help of the 'instance()' function. Without args it returns the first
-                in document order which is always the default.-->
-                <p>eNahar <strong>ICal manager</strong>
-                        </p>
-            </div>
-
             <fieldset>
                 <legend>Search</legend>
                 <fx-control id="cutype" ref="./cutype" update-event="change">
@@ -336,7 +299,7 @@ li a:hover:not(.active){
                 </fx-control>
                 </fx-group>
                 <fx-control id="provider" ref="instance('default')/selected" update-event="change">
-                    <label>iCal Name</label>
+                    <label>ICal Name</label>
                     <select ref="instance('i-providers')//*:ICal" class="widget" selection="open">
                         <template>
                             <option value="{./*:id/@value}">{./fhir:name/@value}</option>
@@ -348,23 +311,35 @@ li a:hover:not(.active){
                     <fx-refresh event="value-changed" target="proflist" self="self"/>
                 </fx-control>
                 <fx-control ref="./show-all-icals" update-event="input" value-prop="checked">
-                        <label class="" for="check1">All iCals?</label>
+                        <label class="" for="check1">All ICals?</label>
                         <input id="check1" class="widget" type="checkbox"/>
                         <fx-send event="value-changed" submission="s-ical-names"/>
                 </fx-control>
-                <fx-trigger>
-                    <button>New</button>
+                <div class="buttonBar">
+                <fx-trigger class="add">
+                    <button>New ICal</button>
                     <fx-action>
                         <fx-insert ref="./fhir:ICal" context="instance('i-cal')" origin="instance('i-ical-infos')//*:ICal[fhir:cutype//fhir:code/@value='empty']"/>
+                                <!-- setting generated id on new msPart 
+                                <fx-var name="uuid" value="gen-id()"></fx-var>
+                                <fx-setvalue ref="//msPart[index('parts')]/@xml:id" value="$uuid"></fx-setvalue>
+                                -->
                         <fx-show dialog="d-new-ical"/>
                     </fx-action>
                 </fx-trigger>
-                <fx-trigger ref="instance('i-control')/save-trigger">
+                <fx-trigger ref="instance('i-control')/save-trigger" class="add">
                     <button>Save</button>
                     <fx-action>
                         <fx-send submission="s-save"/>
                     </fx-action>
                 </fx-trigger>
+                <fx-trigger class="add">
+                    <button>Help</button>
+                    <fx-action>
+                        <fx-show dialog="d-ical-help"/>
+                    </fx-action>
+                </fx-trigger>
+                </div>
                 <fx-dialog id="d-new-ical">
                     <fx-setfocus control="ical-cutype" event="dialog-shown" delay="500"/>
                     <div class="dialog-content">
@@ -416,16 +391,26 @@ li a:hover:not(.active){
                     <button>Schließen</button>
                     <fx-hide dialog="d-new-ical"/>
                     
-                    <fx-message>New Ical initialzed</fx-message>              
+                    <fx-message>New ICal initialzed</fx-message>              
                 </fx-trigger>
             </div>
+            </fx-dialog>
+            <fx-dialog id="d-ical-help">
+                <div class="dialog-content">
+                    <header>ICal Help</header>
+                    <p>... help ...</p>
+                    <fx-trigger class="action">
+                        <button>Schließen</button>
+                        <fx-hide dialog="d-ical-help"/>
+                    </fx-trigger>
+                </div>
             </fx-dialog>
              </fieldset>
         </section>
         <section class="{if(string-length(instance()/@user) != 0) then 'loggedIn' else 'hidden'}">
         <details>
             <summary>
-                <strong>{if (instance('i-cal')[./fhir:id/@value]) then 'Global Infos' else 'No iCal selected'}</strong>
+                <strong>{if (instance('i-cal')[./fhir:id/@value]) then 'Global Infos' else 'No ICal selected'}</strong>
             </summary>
             <fx-group class="wrapit" ref="instance('i-cal')">
             <fx-action event="value-changed">

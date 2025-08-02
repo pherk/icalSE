@@ -1,0 +1,117 @@
+<ical-infos><!-- FHIR status -->
+    <status><!-- <code value="open"      label="offen"/> -->
+        <code value="confirmed" label="bestätigt"/>
+        <code value="tentative" label="provisorisch"/>
+        <code value="cancelled" label="cancelled"/>
+    </status>
+    <duration>
+        <code value="15" label="15min"/>
+        <code value="30" label="30min"/>
+        <code value="60" label="60min"/>
+        <code value="90" label="90min"/>
+        <code value="120" label="120m"/>
+    </duration>
+    <transparancy id="opaque" name="exklusiv"/>
+    <transparency id="transparent" name="transparent"/>
+    <visibility id="default" name="default"/>
+    <visibility id="public" name="publik"/>
+    <visibility id="private" name="privat"/>
+    <response id="needsAction" name="keine Bestätigung"/>
+    <response id="declined" name="abgelehnt"/>
+    <responde id="tentative" name="provisorisch"/>
+    <response id="accepted" name="akzeptiert"/>
+    <orderby id="startTime" name="Beginn"/>
+    <orderby id="updated" name="updated"/>
+    <accessRole id="none" name="kein Zugriff"/>
+    <accessRole id="freeBusyRead" name="FreeBusy lesen"/>
+    <accessRole id="reader" name="Lesen"/>
+    <accessRole id="write" name="Schreiben"/>
+    <accessRole id="owner" name="Besitzer"/>
+    <fbtype id="free" name="frei"/>
+    <fbtype id="busy" name="busy"/>
+    <fbtype id="busy-unavailable" name="nicht verfügbar"/>
+    <fbtype id="busy-tentative" name="busy-provisorisch"/>
+    <fbtype id="out-of-office" name="nicht da"/>
+    <cutype id="person" name="Person"/>
+    <cutype id="group" name="Gruppe"/>
+    <cutype id="resource" name="Resource"/>
+    <cutype id="room" name="Raum"/>
+    <firstDay>1</firstDay>
+    <monat id="1" name="Januar" short="Jan"/>
+    <monat id="2" name="Februar" short="Feb"/>
+    <monat id="3" name="März" short="Mar"/>
+    <monat id="4" name="April" short="Apr"/>
+    <monat id="5" name="Mai" short="Mai"/>
+    <monat id="6" name="Juni" short="Jun"/>
+    <monat id="7" name="Juli" short="Jul"/>
+    <monat id="8" name="August" short="Aug"/>
+    <monat id="9" name="September" short="Sep"/>
+    <monat id="10" name="Oktober" short="Okt"/>
+    <monat id="11" name="November" short="Nov"/>
+    <monat id="12" name="Dezember" short="Dez"/>
+    <day id="1" name="Montag" short="Mo"/>
+    <day id="2" name="Dienstag" short="Di"/>
+    <day id="3" name="Mittwoch" short="Mi"/>
+    <day id="4" name="Donnerstag" short="Do"/>
+    <day id="5" name="Freitag" short="Fr"/>
+    <day id="6" name="Samstag" short="Sa"/>
+    <day id="0" name="Sonntag" short="So"/>
+    <weekend>Sa,So</weekend>
+    <rrule>
+        <freq value="daily" label="täglich"/>
+        <freq value="weekly" label="wöchentlich"/>
+        <freq value="monthly" label="monatlich"/>
+        <freq value="yearly" label="jährlich"/>
+        <byWeekno value="every" label="jede"/>
+        <byWeekno value="odd" label="ungerade"/>
+        <byWeekno value="even" label="gerade"/>
+        <byWeekno value="1" label="1"/>
+        <byWeekno value="2" label="2"/>
+        <byWeekno value="3" label="3"/>
+        <byWeekno value="4" label="4"/>
+        <byday value="Mo" label="Mo"/>
+        <byday value="Di" label="Di"/>
+        <byday value="Mi" label="Mi"/>
+        <byday value="Do" label="Do"/>
+        <byday value="Fr" label="Fr"/>
+        <byday value="Sa" label="Sa"/>
+        <byday value="So" label="So"/>
+    </rrule>
+    <schedule>
+        <type value="service" label="Ambulanz"/>
+        <type value="worktime" label="Arbeitszeit"/>
+        <type value="meeting" label="Meeting"/>
+    </schedule>
+    <bricks>
+        <ICal xmlns="http://hl7.org/fhir">
+            <id value="ical-empty"/>
+            <meta>
+              <versionId value="0"/>
+            </meta>
+            <identifier>
+                <use value="official"/>
+                <system value="http://eNahar.org/ns/system/ical-id"/>
+                <value value="empty"/>
+            </identifier>
+            <active value="true"/>
+            <cutype>
+                <coding>
+                    <system value="http://eNahar.org/fhir/nabu/Valueset/NabuICalUserType"/>
+                    <code value="empty"/>
+                </coding>
+            </cutype>
+            <caltype>
+                <coding>
+                    <system value="http://eNahar.org/fhir/nabu/Valueset/NabuICalCalType"/>
+                    <code value="primary"/>
+                </coding>
+            </caltype>
+            <organization>
+                <reference value="Organization/kikl-spz"/>
+                <display value="UKK SPZ"/>
+            </organization>
+            <name value="..."/>
+            <comment value="initial"/>
+        </ICal>
+    </bricks>
+</ical-infos>
